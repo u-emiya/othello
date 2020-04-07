@@ -97,22 +97,10 @@ public class GameController : MonoBehaviour {
                     //白のターンのとき
                     if (currentPlayer == WHITE)
                     {
-                        //Squaresの値を更新
-                        squares[z, x] = WHITE;
-                 
-                        //Stoneを出力
-                        GameObject stone = Instantiate(koma);
-                        reverse(stone);
-                        Vector3 pos = hit.collider.gameObject.transform.position;
-                        pos.y = 0.35f;
-                        stone.transform.position = pos;
-                        
-                        //置いた駒の情報を登録
-                        int key = x * 10+z;
-                        Debug.Log("oiteiru white");
-                        Debug.Log("x:" + x + ",z:" + z + "key:" + key);
-                        map.Add(key, stone);
+                        //石を置く
+                        putStone(WHITE, x, z);
 
+                        //ひっくり返す
                         reverseStone(x, z, dir);
                         //Playerを交代
                         currentPlayer = BLACK;
@@ -120,20 +108,10 @@ public class GameController : MonoBehaviour {
                     //黒のターンのとき
                     else if (currentPlayer == BLACK)
                     {
-                        //Squaresの値を更新
-                        squares[z, x]= BLACK;
+                        //石を置く
+                        putStone(BLACK, x, z);
 
-                        //Stoneを出力
-                        GameObject stone = Instantiate(koma);
-                        Vector3 pos = hit.collider.gameObject.transform.position;
-                        pos.y = 0.35f;
-                        stone.transform.position = pos;
-
-                        int key = x * 10 + z;
-                        Debug.Log("oiteiru black");
-                        Debug.Log("x:" + x + ",z:" + z + "key:" + key);
-                        map.Add(key, stone);
-
+                        //ひっくり返す
                         reverseStone(x, z, dir);
                           //Playerを交代
                         currentPlayer = WHITE;
@@ -379,6 +357,28 @@ public class GameController : MonoBehaviour {
         slide.SlideIn();
 
     }
+    public bool putStone(int color,int x,int z)
+    {
+        //Squaresの値を更新
+        if (color == WHITE)
+            squares[z, x] = WHITE;
+        else
+            squares[z, x] = BLACK;
+
+        //Stoneを出力
+        GameObject stone = Instantiate(koma);
+if (color == WHITE)
+reverse(stone);
+        Vector3 pos = hit.collider.gameObject.transform.position;
+        pos.y = 0.35f;
+        stone.transform.position = pos;
+
+        //置いた駒の情報を登録
+        int key = x * 10 + z;
+        map.Add(key, stone);
+        return true;
+    }
+
     private bool isEmpty()
     {
         for (int i = 0; i < 8; i++)
