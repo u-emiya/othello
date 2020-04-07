@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class movePlayer : MonoBehaviour
+public class MovePlayer : MonoBehaviour
 {
     private int[,] squares = new int[8, 8];
+ private const int EMPTY = 0;
+    private const int WHITE = 1;
+    private const int BLACK = -1;
 
     public GameController gameController;
 
@@ -25,7 +28,7 @@ public class movePlayer : MonoBehaviour
     {
         
     }
-    private void gamePlay(int player)
+    public void gamePlay(int player)
     {
         if (Input.GetMouseButtonDown(0))
         {
@@ -46,7 +49,7 @@ public class movePlayer : MonoBehaviour
                         //ひっくり返す
                         gameController.reverseStone(x, z, dir);
                         //Playerを交代
-                        setCurrentPlayer(BLACK);
+                        gameController.setCurrentPlayer(BLACK);
                     }
                     //黒のターンのとき
                     else if (currentPlayer == BLACK)
@@ -57,7 +60,7 @@ public class movePlayer : MonoBehaviour
                         //ひっくり返す
                         gameController.reverseStone(x, z, dir);
                         //Playerを交代
-                        setCurrentPlayer(WHITE);
+                        gameController.setCurrentPlayer(WHITE);
                     }
                 }
 

@@ -22,8 +22,7 @@ public class GameController : MonoBehaviour {
     public GameObject PlayerTurn;
     public PanelSlider slide;
 
-    public movePlayer movePlayer;
-
+    public MovePlayer movePlayer;
 
     private int blackCnt = 0;
     private int whiteCnt = 0;
@@ -69,7 +68,7 @@ public class GameController : MonoBehaviour {
             }
             else
             {
-                gamePlay(WHITE);
+                movePlayer.gamePlay(WHITE);
                 passCount = 0;
             }
         }
@@ -198,7 +197,7 @@ public class GameController : MonoBehaviour {
     }
     
     //座標(x,z)に置いたとき、コマをひっくり返す方向を示す配列dirに従って、コマをひっくり返していく。
-    private void reverseStone(int x,int z,int[] dir)
+    public void reverseStone(int x,int z,int[] dir)
     {
         int dirx=0, dirz=0;
         int reverseX = x;
