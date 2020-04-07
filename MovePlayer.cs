@@ -18,8 +18,6 @@ public class MovePlayer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        squares = gameController.getSquares();
-        currentPlayer = gameController.getCurrentPlayer();
         cameobj = GameObject.Find("Main Camera").GetComponent<Camera>();
     }
 
@@ -30,6 +28,9 @@ public class MovePlayer : MonoBehaviour
     }
     public void gamePlay(int player)
     {
+        squares = gameController.getSquares();
+        currentPlayer = gameController.getCurrentPlayer();
+
         if (Input.GetMouseButtonDown(0))
         {
             Ray ray = cameobj.ScreenPointToRay(Input.mousePosition);
@@ -44,7 +45,7 @@ public class MovePlayer : MonoBehaviour
                     if (currentPlayer == WHITE)
                     {
                         //石を置く
-                        gameController.putStone(WHITE, x, z);
+                        gameController.putStone(WHITE, x, z,hit);
 
                         //ひっくり返す
                         gameController.reverseStone(x, z, dir);
@@ -55,7 +56,7 @@ public class MovePlayer : MonoBehaviour
                     else if (currentPlayer == BLACK)
                     {
                         //石を置く
-                        gameController.putStone(BLACK, x, z);
+                        gameController.putStone(BLACK, x, z,hit);
 
                         //ひっくり返す
                         gameController.reverseStone(x, z, dir);

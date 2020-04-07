@@ -22,7 +22,7 @@ public class GameController : MonoBehaviour {
     public GameObject PlayerTurn;
     public PanelSlider slide;
 
-    public movePlayer movePlayer;
+    public MovePlayer movePlayer;
 
     private int blackCnt = 0;
     private int whiteCnt = 0;
@@ -81,7 +81,7 @@ public class GameController : MonoBehaviour {
             }
             else
             {
-                gamePlay(BLACK);
+                movePlayer.gamePlay(BLACK);
                 passCount = 0;
             }
 
@@ -108,7 +108,7 @@ public class GameController : MonoBehaviour {
                     if (currentPlayer == WHITE)
                     {
                         //石を置く
-                        putStone(WHITE, x, z);
+                     //   putStone(WHITE, x, z);
 
                         //ひっくり返す
                         reverseStone(x, z, dir);
@@ -119,7 +119,7 @@ public class GameController : MonoBehaviour {
                     else if (currentPlayer == BLACK)
                     {
                         //石を置く
-                        putStone(BLACK, x, z);
+                       // putStone(BLACK, x, z);
 
                         //ひっくり返す
                         reverseStone(x, z, dir);
@@ -367,7 +367,7 @@ public class GameController : MonoBehaviour {
         slide.SlideIn();
 
     }
-    public bool putStone(int color,int x,int z)
+    public bool putStone(int color,int x,int z, RaycastHit hit)
     {
         //Squaresの値を更新
         if (color == WHITE)
