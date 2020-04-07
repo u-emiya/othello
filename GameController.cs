@@ -22,6 +22,8 @@ public class GameController : MonoBehaviour {
     public GameObject PlayerTurn;
     public PanelSlider slide;
 
+    public movePlayer movePlayer;
+
 
     private int blackCnt = 0;
     private int whiteCnt = 0;
@@ -36,10 +38,19 @@ public class GameController : MonoBehaviour {
     {
         return whiteCnt;
     }
+    public int[,] getSquares()
+    {
+        return squares;
+    }
 
     public int getCurrentPlayer()
     {
         return currentPlayer;
+    }
+
+    public void setCurrentPlayer(int player)
+    {
+        currentPlayer = player;
     }
 
     void Start () {
@@ -142,7 +153,7 @@ public class GameController : MonoBehaviour {
     //座標(x,z)に駒が置けるかどうかの確認
     //置ける場合はint[4]=9となる。また、その場所に駒を置いた場合に駒をひっくり返す方向は1となる。
     //置けない場合はint[4]=-9となる。
-    private int[] isPosition(int x,int z)
+    public int[] isPosition(int x,int z)
     {
         int jdgx, jdgz;
         int[] judge = new int[9];
@@ -394,7 +405,7 @@ reverse(stone);
     }
 
     //コマオブジェクトをひっくり返す。
-    private void reverse(GameObject koma)
+    public void reverse(GameObject koma)
     {
         
         Vector3 localAngle = koma.transform.localEulerAngles;
