@@ -5,7 +5,7 @@ using UnityEngine;
 public class MovePlayer : MonoBehaviour
 {
     private int[,] squares = new int[8, 8];
- private const int EMPTY = 0;
+    private const int EMPTY = 0;
     private const int WHITE = 1;
     private const int BLACK = -1;
 
@@ -26,7 +26,7 @@ public class MovePlayer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
     public void gamePlay(int player)
     {
@@ -69,3 +69,4 @@ public class MovePlayer : MonoBehaviour
     }
 
 }
+

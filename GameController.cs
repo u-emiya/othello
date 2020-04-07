@@ -22,7 +22,7 @@ public class GameController : MonoBehaviour {
     public GameObject PlayerTurn;
     public PanelSlider slide;
 
-    public MovePlayer movePlayer;
+    public movePlayer movePlayer;
 
     private int blackCnt = 0;
     private int whiteCnt = 0;
