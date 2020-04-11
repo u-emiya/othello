@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameController : MonoBehaviour {
+public class GameController : MonoBehaviour
+{
 
     private int[,] squares = new int[8, 8];
     private IDictionary<int, GameObject> map = new Dictionary<int, GameObject>();
@@ -23,10 +24,15 @@ public class GameController : MonoBehaviour {
     public PanelSlider slide;
 
     public MovePlayer movePlayer;
+    public computerPlayer comPlayer;
+    public TitleController tc;
+
 
     private int blackCnt = 0;
     private int whiteCnt = 0;
     private int passCount = 0;
+
+    private int playerNum = 1;
 
     public int getBlackCnt()
     {
@@ -52,13 +58,17 @@ public class GameController : MonoBehaviour {
         currentPlayer = player;
     }
 
-    void Start () {
+    void Start()
+    {
+        playerNum = tc.getPlayerNum();
+
         cameobj = GameObject.Find("Main Camera").GetComponent<Camera>();
         InitializaArray();
-	}
-	
-	// Update is called once per frame
-	void Update () {
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
         if (currentPlayer == WHITE)
         {
             if (!isPutStoneAnyposition())
@@ -68,7 +78,10 @@ public class GameController : MonoBehaviour {
             }
             else
             {
-                movePlayer.gamePlay(WHITE);
+                if (playerNum == 1)
+                    comPlayer.gamePlay(WHITE);
+                else
+                    movePlayer.gamePlay(WHITE);
                 passCount = 0;
             }
         }
@@ -86,29 +99,29 @@ public class GameController : MonoBehaviour {
             }
 
         }
-        if (!isEmpty() || passCount==2)
+        if (!isEmpty() || passCount == 2)
         {
             isWin();
         }
-	}
+    }
 
     private void gamePlay(int player)
     {
         if (Input.GetMouseButtonDown(0))
         {
             Ray ray = cameobj.ScreenPointToRay(Input.mousePosition);
-            if(Physics.Raycast(ray,out hit))
+            if (Physics.Raycast(ray, out hit))
             {
                 int x = (int)hit.collider.gameObject.transform.position.x;
                 int z = (int)hit.collider.gameObject.transform.position.z;
-                int[] dir= isPosition(x, z);
-                if (squares[z, x] == EMPTY && dir[4]==9)
+                int[] dir = isPosition(x, z);
+                if (squares[z, x] == EMPTY && dir[4] == 9)
                 {
                     //白のターンのとき
                     if (currentPlayer == WHITE)
                     {
                         //石を置く
-                     //   putStone(WHITE, x, z);
+                        //   putStone(WHITE, x, z);
 
                         //ひっくり返す
                         reverseStone(x, z, dir);
@@ -119,24 +132,24 @@ public class GameController : MonoBehaviour {
                     else if (currentPlayer == BLACK)
                     {
                         //石を置く
-                       // putStone(BLACK, x, z);
+                        // putStone(BLACK, x, z);
 
                         //ひっくり返す
                         reverseStone(x, z, dir);
-                          //Playerを交代
+                        //Playerを交代
                         currentPlayer = WHITE;
                     }
                 }
-                
+
             }
         }
     }
 
     private bool isPutStoneAnyposition()
     {
-       for(int i = 0; i < 8; i++)
+        for (int i = 0; i < 8; i++)
         {
-            for(int j = 0; j < 8; j++)
+            for (int j = 0; j < 8; j++)
             {
                 if (squares[j, i] != EMPTY)
                 {
@@ -152,7 +165,7 @@ public class GameController : MonoBehaviour {
     //座標(x,z)に駒が置けるかどうかの確認
     //置ける場合はint[4]=9となる。また、その場所に駒を置いた場合に駒をひっくり返す方向は1となる。
     //置けない場合はint[4]=-9となる。
-    public int[] isPosition(int x,int z)
+    public int[] isPosition(int x, int z)
     {
         int jdgx, jdgz;
         int[] judge = new int[9];
@@ -175,7 +188,7 @@ public class GameController : MonoBehaviour {
 
                 if ((0 <= jdgx && jdgx <= 7) && (0 <= jdgz && jdgz <= 7))
                 {
-                    if (squares[jdgz, jdgx] != EMPTY && squares[jdgz,jdgx] != currentPlayer)
+                    if (squares[jdgz, jdgx] != EMPTY && squares[jdgz, jdgx] != currentPlayer)
                     {
 
                         if (isDirction(i, j, jdgx, jdgz))
@@ -195,16 +208,16 @@ public class GameController : MonoBehaviour {
 
         return judge;
     }
-    
+
     //座標(x,z)に置いたとき、コマをひっくり返す方向を示す配列dirに従って、コマをひっくり返していく。
-    public void reverseStone(int x,int z,int[] dir)
+    public void reverseStone(int x, int z, int[] dir)
     {
-        int dirx=0, dirz=0;
+        int dirx = 0, dirz = 0;
         int reverseX = x;
         int reverseZ = z;
         for (int i = 0; i < 9; i++)
         {
-            Debug.Log("dir[" +i+"]:"+dir[i]);
+            Debug.Log("dir[" + i + "]:" + dir[i]);
             if (dir[i] != 1)
             {
                 continue;
@@ -250,7 +263,7 @@ public class GameController : MonoBehaviour {
                 dirx = 1;
                 dirz = 1;
             }
-            while(true)
+            while (true)
             {
                 reverseX += dirx;
                 reverseZ += dirz;
@@ -273,16 +286,16 @@ public class GameController : MonoBehaviour {
     }
 
     //座標(x,z)からdirx,dirzに従って駒をひっくり返すことができるかを示す
-    private bool isDirction(int dirx,int dirz,int x,int z)
+    private bool isDirction(int dirx, int dirz, int x, int z)
     {
-        while((0<=x && x<=7) &&(0<=z && z <= 7))
+        while ((0 <= x && x <= 7) && (0 <= z && z <= 7))
         {
             x += dirx;
             z += dirz;
             if ((x < 0 || 7 < x) || (z < 0 || 7 < z))
                 break;
             Debug.Log("x:" + x + ",z:" + z);
-            if (squares[z, x]== currentPlayer)
+            if (squares[z, x] == currentPlayer)
             {
                 return true;
             }
@@ -321,7 +334,7 @@ public class GameController : MonoBehaviour {
                 }
                 else if ((i == 4 && j == 4) || (i == 3 && j == 3))
                 {
-                    squares[j, i]= BLACK;
+                    squares[j, i] = BLACK;
                     GameObject blackKoma = Instantiate(koma);
                     pos = blackKoma.transform.position;
                     pos.x = i; pos.z = j; pos.y = 0.3f;
@@ -330,13 +343,13 @@ public class GameController : MonoBehaviour {
 
                     int key = i * 10 + j;
 
-                    Debug.Log("i:"+i+",j:"+j+"key:" + key);
+                    Debug.Log("i:" + i + ",j:" + j + "key:" + key);
                     map.Add(key, blackKoma);
 
                 }
                 else
                 {
-                    squares[j, i]=EMPTY;
+                    squares[j, i] = EMPTY;
                 }
             }
 
@@ -346,9 +359,9 @@ public class GameController : MonoBehaviour {
     {
         int wcnt = 0;
         int bcnt = 0;
-        for(int i = 0; i < 8; i++)
+        for (int i = 0; i < 8; i++)
         {
-            for(int j = 0; j < 8; j++)
+            for (int j = 0; j < 8; j++)
             {
                 if (squares[j, i] == 1)
                     wcnt++;
@@ -367,7 +380,7 @@ public class GameController : MonoBehaviour {
         slide.SlideIn();
 
     }
-    public bool putStone(int color,int x,int z, RaycastHit hit)
+    public bool putStone(int color, int x, int z, RaycastHit hit)
     {
         //Squaresの値を更新
         if (color == WHITE)
@@ -377,8 +390,8 @@ public class GameController : MonoBehaviour {
 
         //Stoneを出力
         GameObject stone = Instantiate(koma);
-if (color == WHITE)
-reverse(stone);
+        if (color == WHITE)
+            reverse(stone);
         Vector3 pos = hit.collider.gameObject.transform.position;
         pos.y = 0.35f;
         stone.transform.position = pos;
@@ -387,6 +400,30 @@ reverse(stone);
         int key = x * 10 + z;
         map.Add(key, stone);
         return true;
+    }
+    public bool putStonePosition(int color, int x, int z)
+    {
+        //Squaresの値を更新
+        if (color == WHITE)
+            squares[z, x] = WHITE;
+        else
+            squares[z, x] = BLACK;
+
+        //Stoneを出力
+        GameObject stone = Instantiate(koma);
+        if (color == WHITE)
+            reverse(stone);
+        Vector3 pos = new Vector3();
+        pos.x = x;
+        pos.y = 0.35f;
+        pos.z = z;
+        stone.transform.position = pos;
+
+        //置いた駒の情報を登録
+        int key = x * 10 + z;
+        map.Add(key, stone);
+        return true;
+
     }
 
     private bool isEmpty()
@@ -406,7 +443,7 @@ reverse(stone);
     //コマオブジェクトをひっくり返す。
     public void reverse(GameObject koma)
     {
-        
+
         Vector3 localAngle = koma.transform.localEulerAngles;
         localAngle.x = 180.0f;
         koma.transform.localEulerAngles = localAngle;

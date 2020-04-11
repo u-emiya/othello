@@ -6,8 +6,10 @@ using UnityEngine.SceneManagement;
 
 public class ContinueButton : MonoBehaviour {
 
+
     public void OnClick(){
-        SceneManager.LoadScene("othello");
+        FadeManager.Instance.LoadScene("othello", 2.0f);
+//        SceneManager.LoadScene("othello");
 }
 
 	
