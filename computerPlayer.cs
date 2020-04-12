@@ -44,7 +44,7 @@ public class computerPlayer : MonoBehaviour
         {
             for(int j = 0; j < 8; j++)
             {
-                if (squares[j, i] == 0 && gameController.isPosition(i, j)[4]==9)
+                if (squares[j, i] == 0 && gameController.isPosition(i, j, this.squares)[4]==9)
                 {
                     if (squaresheet[saveZ, saveX] < squaresheet[j, i] || saveX == 0)
                     {
@@ -61,7 +61,7 @@ public class computerPlayer : MonoBehaviour
             gameController.putStonePosition(WHITE, saveX, saveZ);
 
             //ひっくり返す
-            gameController.reverseStone(saveX, saveZ, gameController.isPosition(saveX, saveZ));
+            gameController.reverseStone(saveX, saveZ, gameController.isPosition(saveX, saveZ,this.squares));
             //Playerを交代
             gameController.setCurrentPlayer(BLACK);
         }
@@ -72,7 +72,7 @@ public class computerPlayer : MonoBehaviour
             gameController.putStonePosition(BLACK, saveX, saveZ);
 
             //ひっくり返す
-            gameController.reverseStone(saveX, saveZ, gameController.isPosition(saveX, saveZ));
+            gameController.reverseStone(saveX, saveZ, gameController.isPosition(saveX, saveZ,this.squares));
             //Playerを交代
             gameController.setCurrentPlayer(WHITE);
         }

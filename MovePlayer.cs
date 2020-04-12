@@ -30,7 +30,6 @@ public class MovePlayer : MonoBehaviour
     {
         squares = gameController.getSquares();
         currentPlayer = gameController.getCurrentPlayer();
-
         if (Input.GetMouseButtonDown(0))
         {
             Ray ray = cameobj.ScreenPointToRay(Input.mousePosition);
@@ -38,7 +37,7 @@ public class MovePlayer : MonoBehaviour
             {
                 int x = (int)hit.collider.gameObject.transform.position.x;
                 int z = (int)hit.collider.gameObject.transform.position.z;
-                int[] dir = gameController.isPosition(x, z);
+                int[] dir = gameController.isPosition(x, z, this.squares);
                 if (squares[z, x] == EMPTY && dir[4] == 9)
                 {
                     //白のターンのとき

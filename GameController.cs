@@ -25,6 +25,7 @@ public class GameController : MonoBehaviour
 
     public MovePlayer movePlayer;
     public computerPlayer comPlayer;
+    public MiniMaxPlayer minmaxPlayer;
     public TitleController tc;
 
 
@@ -79,10 +80,10 @@ public class GameController : MonoBehaviour
             else
             {
                 if (playerNum == 1)
-                    comPlayer.gamePlay(WHITE);
+                    minmaxPlayer.gamePlay(WHITE);
                 else
                     movePlayer.gamePlay(WHITE);
-                passCount = 0;
+                passCount = 0; 
             }
         }
         else
@@ -107,14 +108,14 @@ public class GameController : MonoBehaviour
 
     private void gamePlay(int player)
     {
-        if (Input.GetMouseButtonDown(0))
+        if(Input.GetMouseButtonDown(0))
         {
             Ray ray = cameobj.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out hit))
             {
                 int x = (int)hit.collider.gameObject.transform.position.x;
                 int z = (int)hit.collider.gameObject.transform.position.z;
-                int[] dir = isPosition(x, z);
+                int[] dir = isPosition(x, z,this.squares);
                 if (squares[z, x] == EMPTY && dir[4] == 9)
                 {
                     //白のターンのとき
@@ -145,6 +146,7 @@ public class GameController : MonoBehaviour
         }
     }
 
+    //全ての空いてるマスにおいて、置ける場所があればtrueを、どこにも置けなければfalseを返す。
     private bool isPutStoneAnyposition()
     {
         for (int i = 0; i < 8; i++)
@@ -155,7 +157,7 @@ public class GameController : MonoBehaviour
                 {
                     continue;
                 }
-                if (isPosition(i, j)[4] == 9)
+                if (isPosition(i, j,this.squares)[4] == 9)
                     return true;
             }
         }
@@ -165,7 +167,7 @@ public class GameController : MonoBehaviour
     //座標(x,z)に駒が置けるかどうかの確認
     //置ける場合はint[4]=9となる。また、その場所に駒を置いた場合に駒をひっくり返す方向は1となる。
     //置けない場合はint[4]=-9となる。
-    public int[] isPosition(int x, int z)
+    public int[] isPosition(int x, int z,int [,] sq)
     {
         int jdgx, jdgz;
         int[] judge = new int[9];
@@ -183,17 +185,14 @@ public class GameController : MonoBehaviour
                 }
                 jdgx = x + i;
                 jdgz = z + j;
-                Debug.Log("number:" + dir);
-                Debug.Log("jdgx:" + jdgx + ",jdgz:" + jdgz);
-
+          
                 if ((0 <= jdgx && jdgx <= 7) && (0 <= jdgz && jdgz <= 7))
                 {
-                    if (squares[jdgz, jdgx] != EMPTY && squares[jdgz, jdgx] != currentPlayer)
+                    if (sq[jdgz, jdgx] != EMPTY && sq[jdgz, jdgx] != currentPlayer)
                     {
 
-                        if (isDirction(i, j, jdgx, jdgz))
+                        if (isDirction(i, j, jdgx, jdgz, sq))
                         {
-                            Debug.Log("HIT");
                             judge[dir] = 1;
                             judge[4] = 9;
                         }
@@ -217,7 +216,6 @@ public class GameController : MonoBehaviour
         int reverseZ = z;
         for (int i = 0; i < 9; i++)
         {
-            Debug.Log("dir[" + i + "]:" + dir[i]);
             if (dir[i] != 1)
             {
                 continue;
@@ -271,22 +269,17 @@ public class GameController : MonoBehaviour
                     break;
                 squares[reverseZ, reverseX] *= -1;
                 int key = reverseX * 10 + reverseZ;
-                /*Debug.Log("hikkurikaeshiteru");
-                Debug.Log("x:" + x + ",z:" + z + "key:" + key);
-                Debug.Log("squares:" + squares[z, x]);*/
                 GameObject obj = map[key];
                 reverse(obj);
             }
             reverseX = x;
             reverseZ = z;
 
-
-
         }
     }
 
     //座標(x,z)からdirx,dirzに従って駒をひっくり返すことができるかを示す
-    private bool isDirction(int dirx, int dirz, int x, int z)
+    private bool isDirction(int dirx, int dirz, int x, int z, int[,] sq)
     {
         while ((0 <= x && x <= 7) && (0 <= z && z <= 7))
         {
@@ -294,14 +287,13 @@ public class GameController : MonoBehaviour
             z += dirz;
             if ((x < 0 || 7 < x) || (z < 0 || 7 < z))
                 break;
-            Debug.Log("x:" + x + ",z:" + z);
-            if (squares[z, x] == currentPlayer)
+            if (sq[z, x] == currentPlayer)
             {
                 return true;
             }
-            else if (squares[z, x] == EMPTY)
+            else if (sq[z, x] == EMPTY)
                 return false;
-            else if (squares[z, x] != currentPlayer)
+            else if (sq[z, x] != currentPlayer)
             {
                 continue;
             }
@@ -328,7 +320,6 @@ public class GameController : MonoBehaviour
                     reverse(whiteKoma);
 
                     int key = i * 10 + j;
-                    Debug.Log("i:" + i + ",j:" + j + "key:" + key);
                     map.Add(key, whiteKoma);
 
                 }
@@ -342,8 +333,6 @@ public class GameController : MonoBehaviour
 
 
                     int key = i * 10 + j;
-
-                    Debug.Log("i:" + i + ",j:" + j + "key:" + key);
                     map.Add(key, blackKoma);
 
                 }
@@ -369,10 +358,6 @@ public class GameController : MonoBehaviour
                     bcnt++;
             }
         }
-        /*if (wcnt > bcnt)
-            Debug.Log("white player is winner");
-        else
-            Debug.Log("black player is winner");*/
         blackCnt = bcnt;
         whiteCnt = wcnt;
         Panel.SetActive(true);
@@ -380,6 +365,7 @@ public class GameController : MonoBehaviour
         slide.SlideIn();
 
     }
+    //コマオブジェクトを引数に従って配置する。
     public bool putStone(int color, int x, int z, RaycastHit hit)
     {
         //Squaresの値を更新
@@ -401,6 +387,7 @@ public class GameController : MonoBehaviour
         map.Add(key, stone);
         return true;
     }
+    //putStoneメソッドのRaycastHitが無いバージョン
     public bool putStonePosition(int color, int x, int z)
     {
         //Squaresの値を更新
@@ -426,6 +413,7 @@ public class GameController : MonoBehaviour
 
     }
 
+    //全てのマス目において空マスがあるか確認
     private bool isEmpty()
     {
         for (int i = 0; i < 8; i++)
@@ -449,4 +437,6 @@ public class GameController : MonoBehaviour
         koma.transform.localEulerAngles = localAngle;
 
     }
+
+   
 }
