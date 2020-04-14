@@ -82,12 +82,13 @@ public class GameController : MonoBehaviour
                 if (playerNum == 1)
                     minmaxPlayer.gamePlay(WHITE);
                 else
-                    movePlayer.gamePlay(WHITE);
+                   movePlayer.gamePlay(WHITE);
                 passCount = 0; 
             }
         }
         else
         {
+
             if (!isPutStoneAnyposition())
             {
                 currentPlayer = WHITE;
@@ -95,7 +96,7 @@ public class GameController : MonoBehaviour
             }
             else
             {
-                movePlayer.gamePlay(BLACK);
+                comPlayer.gamePlay(BLACK);
                 passCount = 0;
             }
 

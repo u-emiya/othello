@@ -12,7 +12,7 @@ public class MiniMaxPlayer : MonoBehaviour
     private const int WHITE = 1;
     private const int BLACK = -1;
 
-    private const int DEEP = 2;
+    private const int DEEP =3;
 
     private int[,] squares = new int[8, 8];
     private int currentPlayer;
@@ -25,7 +25,7 @@ public class MiniMaxPlayer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
     public class Node
     {
@@ -33,7 +33,7 @@ public class MiniMaxPlayer : MonoBehaviour
         int z;
         int evaluation;
 
-        public Node(int x,int z)
+        public Node(int x, int z)
         {
             this.x = x;
             this.z = z;
@@ -47,7 +47,7 @@ public class MiniMaxPlayer : MonoBehaviour
 
         public void setEva(int x)
         {
-            this.evaluation=x;
+            this.evaluation = x;
         }
 
         public int getX()
@@ -74,8 +74,10 @@ public class MiniMaxPlayer : MonoBehaviour
         int saveCP = currentPlayer;
         this.squares = gameController.getSquares();
         depthNum = DEEP;
+        abcnt = 0;
+        //Debug.Log("MiniMax");
         Node n = MiniMax(null);
-        Debug.Log("X:" + n.getX() + ",Z:" + n.getZ());
+//Debug.Log("X:" + n.getX() + ",Z:" + n.getZ());
         gameController.setCurrentPlayer(saveCP);
 
         if (currentPlayer == WHITE)
@@ -103,18 +105,26 @@ public class MiniMaxPlayer : MonoBehaviour
 
     }
     private int depthNum;
+    private int abcnt = 0;
+    private Node abNode;
+    private int abEva;
 
     public Node MiniMax(Node p)
     {
-        Node saveNode=new Node(-1,-1);
+        Node saveNode = new Node(-1, -1);
         int current = gameController.getCurrentPlayer();
         int savePlayer = current;
+        int contsw= 0;
+        int banana = 0;
+
         //評価を返す(はず）
         if (depthNum == 0)
         {
+            gameController.setCurrentPlayer(current * -1);
+            // currentPlayer = current * -1;
             int eva = evaluation(current * -1);
+            //int eva = hikiwake(current * -1);
             p.setEva(eva);
-            gameController.setCurrentPlayer(current*-1);
             return p;
         }
 
@@ -122,21 +132,21 @@ public class MiniMaxPlayer : MonoBehaviour
         {
             for (int j = 0; j < 8; j++)
             {
-                int[] dir = gameController.isPosition(i, j,this.squares);
+                int[] dir = gameController.isPosition(i, j, this.squares);
                 if (this.squares[j, i] == 0 && dir[4] == 9)
                 {
-                    Debug.Log("ooooo:curent this class:" + current);
-                    Debug.Log("ooooo:curent GC   class:" + gameController.getCurrentPlayer());
-                    Debug.Log("curent:"+ current+",deothNum:"+depthNum);
-                    Debug.Log("X:" +i + ",Z:" + j);
-                    printBoard();
-                    Node n= new Node(i,j);
+                    //Debug.Log("ooooo:curent this class:" + current);
+                    //Debug.Log("ooooo:curent GC   class:" + gameController.getCurrentPlayer());
+                    //   Debug.Log("curent:" + current + ",deothNum:" + depthNum);
+                    //   Debug.Log("X:" + i + ",Z:" + j);
+                    //printBoard();
+                    Node n = new Node(i, j);
                     if (current == WHITE)
                     {
                         this.squares[j, i] = WHITE;
                         fakeReverseStone(i, j, dir);
                         gameController.setCurrentPlayer(BLACK);
-                        }
+                    }
                     else
                     {
                         this.squares[j, i] = BLACK;
@@ -145,63 +155,236 @@ public class MiniMaxPlayer : MonoBehaviour
                     }
                     depthNum--;
                     n = MiniMax(n);
-                    n.setX(i);n.setZ(j);
+                    n.setX(i); n.setZ(j);
                     undo(i, j, dir);
                     depthNum++;
 
-                    Debug.Log("result");
 
+
+                    //  Debug.Log("result");
+                    //子要素の群から最適なのを選び出す
                     if (saveNode.getX() == -1)
                     {
-                        Debug.Log("X:" + n.getX() + ",Z:" + n.getZ());
+                        /*       Debug.Log("saveNode.getX() == -1");
+                               Debug.Log("X:" + n.getX() + ",Z:" + n.getZ());*/
 
                         saveNode = n;
                     }
                     else if (depthNum % 2 == DEEP % 2)
                     {
-                        if (n.getEva() < saveNode.getEva())
+                        if (n.getEva() > saveNode.getEva())
                         {
-                            Debug.Log("X:" + n.getX() + ",Z:" + n.getZ());
+                            /*        Debug.Log("depthNum:" +depthNum);
+                                    Debug.Log("X:" + n.getX() + ",Z:" + n.getZ());
+                                    Debug.Log("n evaluation:" + n.getEva());
+                                    Debug.Log("save evaluation:" + saveNode.getEva());*/
 
                             saveNode = n;
                         }
                     }
                     else
                     {
-                        if (n.getEva() > saveNode.getEva())
+                        if (n.getEva() < saveNode.getEva())
                         {
-                            Debug.Log("X:" + n.getX() + ",Z:" + n.getZ());
+                            /*                            Debug.Log("depthNum:" + depthNum);
+                                                        Debug.Log("X:" + n.getX() + ",Z:" + n.getZ());
+                                                        Debug.Log("n evaluation:" + n.getEva());
+                                                        Debug.Log("save evaluation:" + saveNode.getEva());*/
                             saveNode = n;
                         }
 
                     }
+                    
+                    if (depthNum == 1)
+                        banana++;
+                    if (abcnt > 0 && banana>0)
+                    {
+                        if (depthNum % 2 == DEEP % 2 && saveNode.getEva() >abNode.getEva()/*abEva*/)
+                        {
+                            contsw++;
+                            //Debug.Log("HIT continue");
+                            break;
+                        }
+                        else if (depthNum % 2 != DEEP % 2 && saveNode.getEva() < abNode.getEva()/* abEva*/)
+                        {
+                            contsw++;
+                           // Debug.Log("HIT continue");
+                            break;
+                        }
+                    }
+                    banana++;
+                    
 
-                   
-                   
+
                 }
-                
+
+            }
+            if (contsw == 1)
+            {
+                //contsw = 0;
+                break;
             }
         }
+
+
+     
+        if (abcnt == 0) 
+        {
+            Debug.Log("first HIT abcnt");
+            Debug.Log("depthNum:" + depthNum);
+        }
+        abcnt++;
+         if (contsw == 1)
+          {
+            //Debug.Log("true:"+contsw);
+              contsw = 0;
+          }
+          else
+          {
+           // Debug.Log("false:" + contsw);
+            //abEva = saveNode.getEva();
+            abNode = saveNode;
+          }
+          
+        //abNode = saveNode;
         gameController.setCurrentPlayer(current * -1);
         return saveNode;
     }
 
+    public int hikiwake(int player)
+    {
+        int ownCnt = 0;
+        int oppositeCnt = 0;
+        for (int i = 0; i < 8; i++)
+        {
+            for (int j = 0; j < 8; j++)
+            {
+                if (gameController.isPosition(i, j, this.squares)[4] == 9)
+                    ownCnt++;
+            }
+        }
+        gameController.setCurrentPlayer(player * -1);
+        for (int i = 0; i < 8; i++)
+        {
+            for (int j = 0; j < 8; j++)
+            {
+                if (gameController.isPosition(i, j, this.squares)[4] == 9)
+                    oppositeCnt++;
+            }
+        }
+        gameController.setCurrentPlayer(player);
+
+        int total = ownCnt - oppositeCnt;
+        if (total < 0)
+            total *= -1;
+        return 100-(total / 64)*100;
+    }
 
     public int evaluation(int player)
     {
-        int count=0;
-        for(int i = 0; i < 8; i++)
+        int ownCnt = 0;
+        int oppositeCnt = 0;
+        int k = 3;
+        for (int i = 0; i < 8; i++)
         {
-            for(int j=0; j < 8; j++)
+            for (int j = 0; j < 8; j++)
             {
-                if (squares[j, i] == player)
-                    count++;
+                if (gameController.isPosition(i, j, this.squares)[4] == 9)
+                    ownCnt++;
             }
         }
-        return count;
+        gameController.setCurrentPlayer(player * -1);
+        for (int i = 0; i < 8; i++)
+        {
+            for (int j = 0; j < 8; j++)
+            {
+                if (gameController.isPosition(i, j, this.squares)[4] == 9)
+                    oppositeCnt++;
+            }
+        }
+        int B = evaluatePosition(player)- evaluatePosition(player*-1);
+        gameController.setCurrentPlayer(player);
+        int A = ownCnt - oppositeCnt;
+        return A+k*B;
     }
-    //GameControllerクラスにあるやつとは違って、ゲーム上のオブジェクトをひっくり返さない
-    public void fakeReverseStone(int x, int z, int[] dir)
+
+    public int evaluatePosition(int player)
+    {
+        int score = 0;
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                if (i == 0 && j == 0 && squares[j, i] == player)
+                    score += 10;
+                if ((i == 2 && j == 0 && squares[j, i] == player) ||
+                    (i == 0 && j == 2 && squares[j, i] == player) ||
+                    (i == 2 && j == 2 && squares[j, i] == player))
+                    score += 1;
+                if ((i == 1 && j == 0 && squares[j, i] == player) ||
+                    (i == 0 && j == 1 && squares[j, i] == player) ||
+                    (i == 1 && j == 1 && squares[j, i] == player))
+                    score -= 5;
+
+            }
+        }
+        for (int i = 5; i < 8; i++)
+        {
+            for (int j = 5; j < 8; j++)
+            {
+                if (i == 7 && j == 7 && squares[j, i] == player)
+                    score += 10;
+                if ((i == 7 && j == 5 && squares[j, i] == player) ||
+                    (i == 5 && j == 7 && squares[j, i] == player) ||
+                    (i == 5 && j == 5 && squares[j, i] == player))
+                    score += 1;
+                if ((i == 6 && j == 7 && squares[j, i] == player) ||
+                    (i == 7 && j == 6 && squares[j, i] == player) ||
+                    (i == 6 && j == 6 && squares[j, i] == player))
+                    score -= 5;
+
+            }
+        }
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 5; j < 8; j++)
+            {
+                if (i == 0 && j == 7 && squares[j, i] == player)
+                    score += 10;
+                if ((i == 2 && j == 5 && squares[j, i] == player) ||
+                    (i == 2 && j == 7 && squares[j, i] == player) ||
+                    (i == 0 && j == 5 && squares[j, i] == player))
+                    score += 1;
+                if ((i == 1 && j == 6 && squares[j, i] == player) ||
+                    (i == 1 && j == 7 && squares[j, i] == player) ||
+                    (i == 0 && j == 6 && squares[j, i] == player))
+                    score -= 5;
+
+            }
+        }
+        for (int i = 5; i < 8; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                if (i == 7 && j == 0 && squares[j, i] == player)
+                    score += 10;
+                if ((i == 5 && j == 2 && squares[j, i] == player) ||
+                    (i == 7 && j == 2 && squares[j, i] == player) ||
+                    (i == 5 && j == 0 && squares[j, i] == player))
+                    score += 1;
+                if ((i == 6 && j == 1 && squares[j, i] == player) ||
+                    (i == 7 && j == 1 && squares[j, i] == player) ||
+                    (i == 6 && j == 0 && squares[j, i] == player))
+                    score -= 5;
+
+            }
+        }
+
+        return score;
+    } 
+
+            //GameControllerクラスにあるやつとは違って、ゲーム上のオブジェクトをひっくり返さない
+            public void fakeReverseStone(int x, int z, int[] dir)
     {
         int dirx = 0, dirz = 0;
         int reverseX = x;
