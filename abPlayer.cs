@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MiniMaxPlayer : MonoBehaviour
+public class abPlayer : MonoBehaviour
 {
 
     public GameController gameController;
@@ -12,7 +12,7 @@ public class MiniMaxPlayer : MonoBehaviour
     private const int WHITE = 1;
     private const int BLACK = -1;
 
-    private const int DEEP = 5;
+    private const int DEEP =5;
 
     private int[,] squares = new int[8, 8];
     private int currentPlayer;
@@ -75,9 +75,7 @@ public class MiniMaxPlayer : MonoBehaviour
         this.squares = gameController.getSquares();
         depthNum = DEEP;
         abcnt = 0;
-        //Debug.Log("MiniMax");
-        Node n = MiniMax(null);
-        //Debug.Log("X:" + n.getX() + ",Z:" + n.getZ());
+        Node n = MiniMax(null,int.MinValue,int.MaxValue);
         gameController.setCurrentPlayer(saveCP);
 
         if (currentPlayer == WHITE)
@@ -109,25 +107,22 @@ public class MiniMaxPlayer : MonoBehaviour
     private Node abNode;
     private int abEva;
 
-    public Node MiniMax(Node p)
+    
+    public Node MiniMax(Node p,int alpha ,int beta)
     {
         Node saveNode = new Node(-1, -1);
         int current = gameController.getCurrentPlayer();
-        int savePlayer = current;
-        int contsw = 0;
-        int banana = 0;
-
+      
+      
         //評価を返す(はず）
         if (depthNum == 0)
         {
             gameController.setCurrentPlayer(current * -1);
-            // currentPlayer = current * -1;
             int eva = evaluation(current * -1);
-            //int eva = hikiwake(current * -1);
             p.setEva(eva);
             return p;
         }
-
+      
         for (int i = 0; i < 8; i++)
         {
             for (int j = 0; j < 8; j++)
@@ -149,81 +144,64 @@ public class MiniMaxPlayer : MonoBehaviour
                         gameController.setCurrentPlayer(WHITE);
                     }
                     depthNum--;
-                    n = MiniMax(n);
+                    n = MiniMax(n, alpha, beta);
                     n.setX(i); n.setZ(j);
                     undo(i, j, dir);
-                    depthNum++;
+                    depthNum++;             
 
-
-
-                    //  Debug.Log("result");
                     //子要素の群から最適なのを選び出す
-                    if (saveNode.getX() == -1)
+                    if (depthNum % 2 == DEEP % 2)
                     {
-                 
-                        saveNode = n;
-                    }
-                    else if (depthNum % 2 == DEEP % 2)
-                    {
-                        if (n.getEva() > saveNode.getEva())
+                        if (saveNode.getX() == -1)
                         {
-                 
                             saveNode = n;
+                            alpha = saveNode.getEva();
+                        }
+                        else if (n.getEva() > saveNode.getEva())
+                        {
+                
+                            saveNode = n;
+                            alpha = saveNode.getEva();
+                        }
+                        if (saveNode.getEva() > beta)
+                        {
+                            //Debug.Log("HIT beta");
+                            gameController.setCurrentPlayer(current * -1);
+                            return saveNode;
+
                         }
                     }
                     else
                     {
-                        if (n.getEva() < saveNode.getEva())
+                        if (saveNode.getX() == -1)
                         {
                             saveNode = n;
+                            beta = saveNode.getEva();
                         }
+                        else if (n.getEva() < saveNode.getEva())
+                        {
 
+                            saveNode = n;
+                            beta = saveNode.getEva();
+                        }
+                        if (saveNode.getEva() < alpha)
+                        {
+                            //Debug.Log("HIT alpha");
+                            gameController.setCurrentPlayer(current * -1);
+                            return saveNode;
+                        }
+                     
                     }
-
-                    if (depthNum == 1)
-                        banana++;
-                  /*  if (abcnt > 0 && banana > 0)
-                    {
-                        if (depthNum % 2 == DEEP % 2 && saveNode.getEva() > abNode.getEva())
-                        {
-                            contsw++;
-                            break;
-                        }
-                        else if (depthNum % 2 != DEEP % 2 && saveNode.getEva() < abNode.getEva())
-                        {
-                            contsw++;
-                            break;
-                        }
-                    }*/
-                    banana++;
-
-
-
                 }
 
             }
-            if (contsw == 1)
-            {
-                break;
-            }
         }
 
-
-
-        abcnt++;
-        if (contsw == 1)
-        {
-            contsw = 0;
-        }
-        else
-        {
-            abNode = saveNode;
-        }
 
         gameController.setCurrentPlayer(current * -1);
         return saveNode;
     }
-
+    
     public int hikiwake(int player)
     {
         int ownCnt = 0;
@@ -250,7 +228,7 @@ public class MiniMaxPlayer : MonoBehaviour
         int total = ownCnt - oppositeCnt;
         if (total < 0)
             total *= -1;
-        return 100 - (total / 64) * 100;
+        return 100-(total / 64)*100;
     }
 
     public int evaluation(int player)
@@ -275,10 +253,11 @@ public class MiniMaxPlayer : MonoBehaviour
                     oppositeCnt++;
             }
         }
-        int B = evaluatePosition(player) - evaluatePosition(player * -1);
+        int B = evaluatePosition(player)- evaluatePosition(player*-1);
         gameController.setCurrentPlayer(player);
         int A = ownCnt - oppositeCnt;
-        return A + k * B;
+      
+        return A +k*B;
     }
 
     public int evaluatePosition(int player)
@@ -354,10 +333,10 @@ public class MiniMaxPlayer : MonoBehaviour
         }
 
         return score;
-    }
+    } 
 
-    //GameControllerクラスにあるやつとは違って、ゲーム上のオブジェクトをひっくり返さない
-    public void fakeReverseStone(int x, int z, int[] dir)
+            //GameControllerクラスにあるやつとは違って、ゲーム上のオブジェクトをひっくり返さない
+            public void fakeReverseStone(int x, int z, int[] dir)
     {
         int dirx = 0, dirz = 0;
         int reverseX = x;
@@ -415,14 +394,14 @@ public class MiniMaxPlayer : MonoBehaviour
                 reverseZ += dirz;
                 this.squares[reverseZ, reverseX] *= -1;
 
-                int cx = reverseX + 2 * dirx;
-                int cz = reverseZ + 2 * dirz;
+                int cx = reverseX + 2*dirx;
+                int cz = reverseZ + 2*dirz;
                 if (cx < 0 || cz < 0 || cx > 7 || cz > 7)
                     break;
                 if (this.squares[cz, cx] == EMPTY)
                     break;
 
-
+                
             }
             reverseX = x;
             reverseZ = z;
@@ -436,14 +415,14 @@ public class MiniMaxPlayer : MonoBehaviour
             for (int j = 0; j < 8; j++)
             {
                 if (squares[j, i] == 1)
-                    Debug.Log("(" + i + "," + j + ")::" + "〇");
+                    Debug.Log("("+i+","+j+")::"+"〇");
                 else if (squares[j, i] == -1)
                     Debug.Log("(" + i + "," + j + ")::" + "●");
             }
         }
     }
     //復元するよ
-    public void undo(int x, int z, int[] dir)
+    public void undo(int x,int z,int[] dir)
     {
         fakeReverseStone(x, z, dir);
         squares[z, x] = 0;

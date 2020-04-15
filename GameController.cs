@@ -26,6 +26,8 @@ public class GameController : MonoBehaviour
     public MovePlayer movePlayer;
     public computerPlayer comPlayer;
     public MiniMaxPlayer minmaxPlayer;
+    public abPlayer abPlayer;
+
     public TitleController tc;
 
 
@@ -80,7 +82,7 @@ public class GameController : MonoBehaviour
             else
             {
                 if (playerNum == 1)
-                    minmaxPlayer.gamePlay(WHITE);
+                    abPlayer.gamePlay(WHITE);
                 else
                    movePlayer.gamePlay(WHITE);
                 passCount = 0; 
