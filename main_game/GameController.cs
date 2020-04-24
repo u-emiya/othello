@@ -21,6 +21,8 @@ public class GameController : MonoBehaviour
     public GameObject koma;
     public GameObject Panel;
     public GameObject PlayerTurn;
+    public GameObject PauseButton;
+
     public PanelSlider slide;
 
     public MovePlayer movePlayer;
@@ -36,6 +38,13 @@ public class GameController : MonoBehaviour
     private int passCount = 0;
 
     private int playerNum = 1;
+
+    public int turn = 1;
+
+    public int getTurn()
+    {
+        return turn;
+    }
 
     public int getBlackCnt()
     {
@@ -82,7 +91,7 @@ public class GameController : MonoBehaviour
             else
             {
                 if (playerNum == 1)
-                    abPlayer.gamePlay(WHITE);
+                    comPlayer.gamePlay(WHITE);
                 else
                    movePlayer.gamePlay(WHITE);
                 passCount = 0; 
@@ -90,7 +99,6 @@ public class GameController : MonoBehaviour
         }
         else
         {
-
             if (!isPutStoneAnyposition())
             {
                 currentPlayer = WHITE;
@@ -98,7 +106,7 @@ public class GameController : MonoBehaviour
             }
             else
             {
-                comPlayer.gamePlay(BLACK);
+                movePlayer.gamePlay(BLACK);
                 passCount = 0;
             }
 
@@ -109,45 +117,7 @@ public class GameController : MonoBehaviour
         }
     }
 
-    private void gamePlay(int player)
-    {
-        if(Input.GetMouseButtonDown(0))
-        {
-            Ray ray = cameobj.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out hit))
-            {
-                int x = (int)hit.collider.gameObject.transform.position.x;
-                int z = (int)hit.collider.gameObject.transform.position.z;
-                int[] dir = isPosition(x, z,this.squares);
-                if (squares[z, x] == EMPTY && dir[4] == 9)
-                {
-                    //白のターンのとき
-                    if (currentPlayer == WHITE)
-                    {
-                        //石を置く
-                        //   putStone(WHITE, x, z);
-
-                        //ひっくり返す
-                        reverseStone(x, z, dir);
-                        //Playerを交代
-                        currentPlayer = BLACK;
-                    }
-                    //黒のターンのとき
-                    else if (currentPlayer == BLACK)
-                    {
-                        //石を置く
-                        // putStone(BLACK, x, z);
-
-                        //ひっくり返す
-                        reverseStone(x, z, dir);
-                        //Playerを交代
-                        currentPlayer = WHITE;
-                    }
-                }
-
-            }
-        }
-    }
+   
 
     //全ての空いてるマスにおいて、置ける場所があればtrueを、どこにも置けなければfalseを返す。
     private bool isPutStoneAnyposition()
@@ -176,7 +146,9 @@ public class GameController : MonoBehaviour
         int[] judge = new int[9];
         judge[4] = -9;
         int dir = 0;
-
+        /*if (sq[z, x] != EMPTY)
+            return judge;
+            */
         for (int i = -1; i < 2; i++)
         {
             for (int j = -1; j < 2; j++)
@@ -214,6 +186,7 @@ public class GameController : MonoBehaviour
     //座標(x,z)に置いたとき、コマをひっくり返す方向を示す配列dirに従って、コマをひっくり返していく。
     public void reverseStone(int x, int z, int[] dir)
     {
+      
         int dirx = 0, dirz = 0;
         int reverseX = x;
         int reverseZ = z;
@@ -313,8 +286,16 @@ public class GameController : MonoBehaviour
             for (int j = 0; j < 8; j++)
             {
                 Vector3 pos;
-                if ((i == 4 && j == 3) || (i == 3 && j == 4))
-                {
+                 if ((i == 4 && j == 3) || (i == 3 && j == 4))
+                  {
+                  /*
+                if ((i == 2 && j == 7) ||
+                    (i == 2 && j == 6)||
+                    (i == 2 && j == 5)||
+                    (i == 1 && j == 5)||
+                    (i == 0 && j == 5))
+                {*/
+
                     squares[j, i] = WHITE;
                     GameObject whiteKoma = Instantiate(koma);
                     pos = whiteKoma.transform.position;
@@ -326,8 +307,16 @@ public class GameController : MonoBehaviour
                     map.Add(key, whiteKoma);
 
                 }
-                else if ((i == 4 && j == 4) || (i == 3 && j == 3))
-                {
+                 else if ((i == 4 && j == 4) || (i == 3 && j == 3))
+                  {
+              /*  else if ((i == 3 && j == 7) ||
+                    (i == 3 && j == 6) ||
+                    (i == 3 && j == 5) ||
+                    (i == 3 && j == 4) ||
+                    (i == 2 && j == 4) ||
+                    (i == 1 && j == 4) ||
+                    (i == 0 && j == 4))
+                {*/
                     squares[j, i] = BLACK;
                     GameObject blackKoma = Instantiate(koma);
                     pos = blackKoma.transform.position;
@@ -365,8 +354,7 @@ public class GameController : MonoBehaviour
         whiteCnt = wcnt;
         Panel.SetActive(true);
         PlayerTurn.SetActive(false);
-        slide.SlideIn();
-
+        PauseButton.SetActive(false);
     }
     //コマオブジェクトを引数に従って配置する。
     public bool putStone(int color, int x, int z, RaycastHit hit)
@@ -388,6 +376,7 @@ public class GameController : MonoBehaviour
         //置いた駒の情報を登録
         int key = x * 10 + z;
         map.Add(key, stone);
+        turn++;
         return true;
     }
     //putStoneメソッドのRaycastHitが無いバージョン
@@ -412,6 +401,7 @@ public class GameController : MonoBehaviour
         //置いた駒の情報を登録
         int key = x * 10 + z;
         map.Add(key, stone);
+        turn++;
         return true;
 
     }
@@ -440,6 +430,20 @@ public class GameController : MonoBehaviour
         koma.transform.localEulerAngles = localAngle;
 
     }
+    //デバッグ用
+    public void printBoard()
+    {
+        for (int i = 0; i < 8; i++)
+        {
+            for (int j = 0; j < 8; j++)
+            {
+                if (squares[j, i] == 1)
+                    Debug.Log("(" + i + "," + j + ")::" + "〇");
+                else if (squares[j, i] == -1)
+                    Debug.Log("(" + i + "," + j + ")::" + "●");
+            }
+        }
+    }
 
-   
+
 }

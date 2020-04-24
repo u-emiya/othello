@@ -13,6 +13,7 @@ public class PanelSlider : MonoBehaviour
     public void SlideIn()
     {
         StartCoroutine(StartSlidePanel(true));
+        Debug.Log("HIT");
     }
 
     // スライドアウト
@@ -28,17 +29,22 @@ public class PanelSlider : MonoBehaviour
         Vector3 moveDistance;            // 移動距離および方向
 
         if (isSlideIn)
+        {
             moveDistance = (inPosition - startPos);
+            Debug.Log("inPosition" + inPosition);
+            Debug.Log("startPos" + startPos);
+            Debug.Log("moveDistance" + moveDistance);
+        }
         else
         {
             moveDistance = (outPosition - startPos);
-
+        }
             while ((Time.time - startTime) < duration)
             {
                 transform.localPosition = startPos + moveDistance * animCurve.Evaluate((Time.time - startTime) / duration);
                 yield return 0;        // 1フレーム後、再開
             }
             transform.localPosition = startPos + moveDistance;
-        }
+        
     }
 }
