@@ -39,12 +39,17 @@ public class GameController : MonoBehaviour
 
     private int playerNum = 1;
 
-    public int turn = 1;
-
+    public int turn = 0;
+    
     public int getTurn()
     {
         return turn;
     }
+    public void setTurn(int turn)
+    {
+         this.turn=turn;
+    }
+
 
     public int getBlackCnt()
     {
@@ -76,6 +81,7 @@ public class GameController : MonoBehaviour
 
         cameobj = GameObject.Find("Main Camera").GetComponent<Camera>();
         InitializaArray();
+        setTurn(0);
     }
 
     // Update is called once per frame
@@ -91,7 +97,7 @@ public class GameController : MonoBehaviour
             else
             {
                 if (playerNum == 1)
-                    comPlayer.gamePlay(WHITE);
+                    movePlayer.gamePlay(WHITE);
                 else
                    movePlayer.gamePlay(WHITE);
                 passCount = 0; 
@@ -106,12 +112,12 @@ public class GameController : MonoBehaviour
             }
             else
             {
-                movePlayer.gamePlay(BLACK);
+                abPlayer.gamePlay(BLACK);
                 passCount = 0;
             }
 
         }
-        if (!isEmpty() || passCount == 2)
+        if (bothEmpty(this.squares) || passCount == 2)
         {
             isWin();
         }
@@ -288,8 +294,8 @@ public class GameController : MonoBehaviour
                 Vector3 pos;
                  if ((i == 4 && j == 3) || (i == 3 && j == 4))
                   {
-                  /*
-                if ((i == 2 && j == 7) ||
+                 
+                /*if ((i == 2 && j == 7) ||
                     (i == 2 && j == 6)||
                     (i == 2 && j == 5)||
                     (i == 1 && j == 5)||
@@ -309,7 +315,7 @@ public class GameController : MonoBehaviour
                 }
                  else if ((i == 4 && j == 4) || (i == 3 && j == 3))
                   {
-              /*  else if ((i == 3 && j == 7) ||
+                /*else if ((i == 3 && j == 7) ||
                     (i == 3 && j == 6) ||
                     (i == 3 && j == 5) ||
                     (i == 3 && j == 4) ||
@@ -407,13 +413,13 @@ public class GameController : MonoBehaviour
     }
 
     //全てのマス目において空マスがあるか確認
-    private bool isEmpty()
+    private bool isEmpty(int[,] sq)
     {
         for (int i = 0; i < 8; i++)
         {
             for (int j = 0; j < 8; j++)
             {
-                if (squares[j, i] == 0)
+                if (sq[j, i] == 0 && isPosition(i, j, sq)[4] == 9)
                     return true;
             }
         }
@@ -430,6 +436,20 @@ public class GameController : MonoBehaviour
         koma.transform.localEulerAngles = localAngle;
 
     }
+
+    public bool bothEmpty(int[,] sq)
+    {
+        int current = getCurrentPlayer();
+        bool curentEmpty = isEmpty(sq);
+        setCurrentPlayer(current * -1);
+        bool oppositeEmpty = isEmpty(sq);
+        setCurrentPlayer(current);
+
+        bool endNode = (!curentEmpty && !oppositeEmpty);
+        return endNode;
+    }
+
+
     //デバッグ用
     public void printBoard()
     {

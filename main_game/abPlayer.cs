@@ -8,14 +8,14 @@ public class abPlayer : MonoBehaviour
     public GameController gameController;
 
     private int[,] squaresheet = new int[,] {
-        {45,-11,4,-1,-1,4,-11,45},
-        {-11,-16,-1,-3,-3,-1,-16,-11},
-        {4,-1,2,-1,-1,2,-1,4},
-        {-1,-3,-1,0,0,-1,-3,-1},
-        {-1,-3,-1,0,0,-1,-3,-1},
-        {4,-1,2,-1,-1,2,-1,4},
-        {-11,-16,-1,-3,-3,-1,-16,-11},
-        {45,-11,4,-1,-1,4,-11,45},
+        { 45,-11,  4, -1, -1,  4,-11, 45},
+        {-11,-30, -1, -3, -3, -1,-30,-11},
+        {  4, -1,  2, -1, -1,  2, -1,  4},
+        { -1, -3, -1,  0,  0, -1, -3, -1},
+        { -1, -3, -1,  0,  0, -1, -3, -1},
+        {  4, -1,  2, -1, -1,  2, -1,  4},
+        {-11,-30, -1, -3, -3, -1,-30,-11},
+        { 45,-11,  4, -1, -1,  4,-11, 45},
         };
     /*  private int[,] squaresheet = new int[,] {
         {30,-12,0,-1,-1,0,-12,30},
@@ -31,7 +31,7 @@ public class abPlayer : MonoBehaviour
     private const int WHITE = 1;
     private const int BLACK = -1;
 
-    private int DEEP =5;
+    private int DEEP =6;
     public void setDeep(int d)
     {
         DEEP = d;
@@ -95,6 +95,7 @@ public class abPlayer : MonoBehaviour
     public void gamePlay(int player)
     {
         int turn= gameController.getTurn();
+        //Debug.Log("turn:" + turn);
         currentPlayer = gameController.getCurrentPlayer();
         int saveCP = currentPlayer;
         this.squares = copySquare(gameController.getSquares());
@@ -103,8 +104,7 @@ public class abPlayer : MonoBehaviour
         Node n = new Node(0, 0);
         bool flag = true;
 
-        Debug.Log("turn:" + turn);
-        if (turn < 44)
+      /*  if (turn < 44)
         {
             if (this.squares[0,0] == EMPTY && gameController.isPosition(0, 0, this.squares)[4] == 9)
             {
@@ -126,18 +126,22 @@ public class abPlayer : MonoBehaviour
                 n = new Node(7, 7);
                 flag = false;
             }
-        }
+        }*/
         if (flag)
         {
             if (turn > 48)
             {
-                setDeep(64-turn+1);
-                Debug.Log("set DEEP:" + DEEP);
+                
+                //Debug.Log("HIT TURN : " + turn);
+                setDeep(60-turn+1);
+                if (depthNum <= 0)
+                    setDeep(1);
+                depthNum = DEEP;
             }
             n = MiniMax(null, int.MinValue, int.MaxValue);
         }
         gameController.setCurrentPlayer(saveCP);
-      
+        //Debug.Log("evaluation:"+n.getEva());
 
         if (currentPlayer == WHITE)
         {
@@ -168,35 +172,46 @@ public class abPlayer : MonoBehaviour
 
     }
     private int depthNum;
-    public int saveX;
-    public int saveZ;
-
+  
 
     public Node MiniMax(Node p,int alpha ,int beta)
     {
         Node saveNode = new Node(-1, -1);
         int[,] saveSQ = new int[8, 8];
         int current = gameController.getCurrentPlayer();
-        //Debug.Log("depth:"+depthNum);
+        //Debug.Log("depth:"+depthNum);     
         //printBoard();
         //評価を返す(はず）
-        if (depthNum == 0)
+
+        bool endNode = gameController.bothEmpty(this.squares);
+
+        if (gameController.getTurn() > 48 && endNode)
         {
             int eva;
             gameController.setCurrentPlayer(current * -1);
-            if (gameController.getTurn() > 48)
-            {
-                eva = totalPoint(current*-1);
-               // Debug.Log("evaluation : "+eva);
-            }
-            else
-            {
-                eva = evaluation(current*-1);
-            }
+            eva = totalPoint(currentPlayer);
             p.setEva(eva);
             return p;
+
         }
-        
+
+        //評価を返す(はず）
+        if (gameController.getTurn() <= 48 && depthNum <= 0)
+        {
+            //DEBUG
+            int eva;
+            gameController.setCurrentPlayer(current * -1);
+            eva = evaluation(currentPlayer);
+            if (p == null)
+            {
+                printBoard();
+            }
+            p.setEva(eva);
+            //Debug.Log("total evaluation : " + eva);
+            return p;
+        }
+
+
         for (int i = 0; i < 8; i++)
         {
             for (int j = 0; j < 8; j++)
@@ -211,23 +226,25 @@ public class abPlayer : MonoBehaviour
                         this.squares[j, i] = WHITE;
                         fakeReverseStone(i, j, dir,current);
                         gameController.setCurrentPlayer(BLACK);
-                        saveX = i;
-                        saveZ = j;
                     }
                     else
                     {
                         this.squares[j, i] = BLACK;
                         fakeReverseStone(i, j, dir,current);
                         gameController.setCurrentPlayer(WHITE);
-                        saveX = i;
-                        saveZ = j;
-
+                
                     }
                     depthNum--;
                     n = MiniMax(n, alpha, beta);
+                    if (n.getX() == -2)
+                    {
+                        gameController.setCurrentPlayer(current);
+                        depthNum--;
+                        n = MiniMax(n, alpha, beta);
+                        depthNum++;
+                    }
                     n.setX(i); n.setZ(j);
                     this.squares = copySquare(saveSQ);
-//                    undo(i, j, dir);
                     depthNum++;             
 
                     //子要素の群から最適なのを選び出す
@@ -246,7 +263,8 @@ public class abPlayer : MonoBehaviour
                         }
                         if (saveNode.getEva() > beta)
                         {
-                            //Debug.Log("HIT beta");
+                      /*      Debug.Log("HIT beta");
+                            Debug.Log("beta:"+beta+",eva:"+saveNode.getEva());*/
                             gameController.setCurrentPlayer(current * -1);
                             return saveNode;
 
@@ -267,7 +285,8 @@ public class abPlayer : MonoBehaviour
                         }
                         if (saveNode.getEva() < alpha)
                         {
-                            //Debug.Log("HIT alpha");
+                         /*   Debug.Log("HIT alpha");
+                            Debug.Log("alpha:" + alpha + ",eva:" + saveNode.getEva());*/
                             gameController.setCurrentPlayer(current * -1);
                             return saveNode;
                         }
@@ -277,7 +296,12 @@ public class abPlayer : MonoBehaviour
 
             }
         }
-
+        if (saveNode.getX() == -1)
+        {
+            saveNode.setX(-2); saveNode.setZ(-2);
+            //Debug.Log("HIT");
+        }
+    
 
         gameController.setCurrentPlayer(current * -1);
         return saveNode;
@@ -286,21 +310,22 @@ public class abPlayer : MonoBehaviour
    
     public int evaluation(int player)
     {
-       // Debug.Log("evaluation player:" + player);
+     //   Debug.Log("evaluation player:" + player);
 
-        int B = evaluatePosition(player)- evaluatePosition(player*-1);
+        int B = evaluatePosition(player);
         //int B = evaluatePutPosition(player);
         int C = confirmedPosition(player) - confirmedPosition(player*-1);
         
         int A = isSetEvaluation(player);
         int D = wingMountain(player) - wingMountain(player * -1);
-      /*  Debug.Log("evaluation   A  :" + A);
+       /* Debug.Log("evaluation   A  :" + A);
         Debug.Log("evaluation   B  :" + B);
-        Debug.Log("evaluation   C  :" + C);*/
+        Debug.Log("evaluation   C  :" + C);
+        Debug.Log("evaluation   D  :" + D);*/
 
         gameController.setCurrentPlayer(player);
-    
-        return 4 * A + 2 * B + 3 * C+D;
+
+        return (4 * A + 1 * B + 3 * C+D);
     }
     public int isSetEvaluation(int player)
     {
@@ -512,10 +537,10 @@ public class abPlayer : MonoBehaviour
             {
                 if (squares[j, i] == player)
                 {
-                    ownScore=squaresheet[j, i];
+                    ownScore += squaresheet[j, i];
                 }else if(squares[j, i] == player*-1)
                 {
-                    oppositeScore= squaresheet[j, i];
+                    oppositeScore += squaresheet[j, i];
 
                 }
 
@@ -524,10 +549,6 @@ public class abPlayer : MonoBehaviour
         return ownScore - oppositeScore;
     }
 
-    public int evaluatePutPosition(int player)
-    {
-        return squaresheet[saveZ, saveX];
-    }
     public int wingMountain(int player)
     {
         int z = 0;
@@ -535,11 +556,11 @@ public class abPlayer : MonoBehaviour
         int ownCnt = 0;
         int wingCnt = 0;
         int mtCnt = 0;
-        bool apple = (squares[0, 0] == player);
-        bool banana = (squares[0, 7] == player);
-        bool cherry = (squares[7, 0] == player);
-        bool dorian = (squares[7, 7] == player);
-
+        bool apple = (squares[0, 0] == player || squares[0, 0] == EMPTY);
+        bool banana = (squares[0, 7] == player || squares[0, 0] == EMPTY);
+        bool cherry = (squares[7, 0] == player || squares[0, 0] == EMPTY);
+        bool dorian = (squares[7, 7] == player || squares[0, 0] == EMPTY);
+        
         if (!apple) { 
             for (int i = 1; i < 7; i++)
             {
@@ -863,13 +884,7 @@ public class abPlayer : MonoBehaviour
             }
         }
     }
-    //復元するよ
-    public void undo(int x,int z,int[] dir)
-    {
-        /*fakeReverseStone(x, z, dir,(player*-1));
-        squares[z, x] = 0;*/
-    }
-
+  
     public int[,] copySquare(int [,] sq)
     {
         int[,] copy = new int[8, 8];
