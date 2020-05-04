@@ -29,6 +29,7 @@ public class GameController : MonoBehaviour
     public computerPlayer comPlayer;
     public MiniMaxPlayer minmaxPlayer;
     public abPlayer abPlayer;
+    public NegascoutPlayer nsPlayer;
 
     public TitleController tc;
 
@@ -112,7 +113,7 @@ public class GameController : MonoBehaviour
             }
             else
             {
-                abPlayer.gamePlay(BLACK);
+                nsPlayer.gamePlay(BLACK);
                 passCount = 0;
             }
 
@@ -292,15 +293,15 @@ public class GameController : MonoBehaviour
             for (int j = 0; j < 8; j++)
             {
                 Vector3 pos;
-                 if ((i == 4 && j == 3) || (i == 3 && j == 4))
-                  {
+                 /*if ((i == 4 && j == 3) || (i == 3 && j == 4))
+                  {*/
                  
-                /*if ((i == 2 && j == 7) ||
+                if ((i == 2 && j == 7) ||
                     (i == 2 && j == 6)||
                     (i == 2 && j == 5)||
                     (i == 1 && j == 5)||
                     (i == 0 && j == 5))
-                {*/
+                {
 
                     squares[j, i] = WHITE;
                     GameObject whiteKoma = Instantiate(koma);
@@ -313,16 +314,16 @@ public class GameController : MonoBehaviour
                     map.Add(key, whiteKoma);
 
                 }
-                 else if ((i == 4 && j == 4) || (i == 3 && j == 3))
-                  {
-                /*else if ((i == 3 && j == 7) ||
+                 /*else if ((i == 4 && j == 4) || (i == 3 && j == 3))
+                  {*/
+                else if ((i == 3 && j == 7) ||
                     (i == 3 && j == 6) ||
                     (i == 3 && j == 5) ||
                     (i == 3 && j == 4) ||
                     (i == 2 && j == 4) ||
                     (i == 1 && j == 4) ||
                     (i == 0 && j == 4))
-                {*/
+                {
                     squares[j, i] = BLACK;
                     GameObject blackKoma = Instantiate(koma);
                     pos = blackKoma.transform.position;
