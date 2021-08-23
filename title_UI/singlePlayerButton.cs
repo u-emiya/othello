@@ -6,10 +6,21 @@ using UnityEngine.SceneManagement;
 public class singlePlayerButton : MonoBehaviour
 {
     public TitleController tc;
+    public GameObject Panel;
+    public GameObject selectPlayerPanel;
+
     public void OnClick()
     {
         tc.setPlayerNum(1);
-        FadeManager.Instance.LoadScene("othello", 2.0f);
+        if (!Panel.activeSelf)
+        {
+            Panel.SetActive(true);
+            selectPlayerPanel.SetActive(false);
+        }
+        else
+        {
+            FadeManager.Instance.LoadScene("othello", 2.0f);
+        }
         //SceneManager.LoadScene("othello");
     }
 }

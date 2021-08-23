@@ -16,10 +16,15 @@ public class TextFadeInOut : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        
         this.targetText = this.GetComponent<Text>();
-        r = targetText.GetComponent<Image>().color.r;
+        Debug.Log(this.targetText);
+        r = targetText.color.r;
+        g = targetText.color.g;
+        b = targetText.color.b;
+        /*r = targetText.GetComponent<Image>().color.r;
         g = targetText.GetComponent<Image>().color.g;
-        b = targetText.GetComponent<Image>().color.b;
+        b = targetText.GetComponent<Image>().color.b;*/
         alpha = 0.0f;
         targetText.color = new Color(r, g, b, alpha);
         state = 0;

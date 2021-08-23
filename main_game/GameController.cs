@@ -7,7 +7,7 @@ public class GameController : MonoBehaviour
 
     private int[,] squares = new int[8, 8];
     private IDictionary<int, GameObject> map = new Dictionary<int, GameObject>();
-
+    
 
     private const int EMPTY = 0;
     private const int WHITE = 1;
@@ -22,6 +22,7 @@ public class GameController : MonoBehaviour
     public GameObject Panel;
     public GameObject PlayerTurn;
     public GameObject PauseButton;
+    public GameObject DaipanButton;
 
     public PanelSlider slide;
 
@@ -76,11 +77,22 @@ public class GameController : MonoBehaviour
         currentPlayer = player;
     }
 
+    public IDictionary<int, GameObject> getKomaMap()
+    {
+        return this.map;
+    }
+
+    public void setKomaMap(IDictionary<int, GameObject> newKomaMap)
+    {
+        this.map = newKomaMap;
+    }
+
+
     void Start()
     {
         playerNum = tc.getPlayerNum();
-
         cameobj = GameObject.Find("Main Camera").GetComponent<Camera>();
+        
         InitializaArray();
         setTurn(0);
     }
@@ -98,10 +110,15 @@ public class GameController : MonoBehaviour
             else
             {
                 if (playerNum == 1)
-                    movePlayer.gamePlay(WHITE);
+                    if (tc.getPlayerTurn() == 1)
+                    {
+                        abPlayer.setDeep(tc.getDeep());
+                        abPlayer.gamePlay(WHITE);
+                    } else
+                        movePlayer.gamePlay(WHITE);
                 else
                    movePlayer.gamePlay(WHITE);
-                passCount = 0; 
+               passCount = 0; 
             }
         }
         else
@@ -113,7 +130,18 @@ public class GameController : MonoBehaviour
             }
             else
             {
-                nsPlayer.gamePlay(BLACK);
+                if (playerNum == 1)
+                    if (tc.getPlayerTurn() == 1)
+                    {
+                        movePlayer.gamePlay(BLACK);
+                    }
+                    else
+                    {
+                        abPlayer.setDeep(tc.getDeep());
+                        abPlayer.gamePlay(BLACK);
+                    }
+                else
+                    movePlayer.gamePlay(BLACK);
                 passCount = 0;
             }
 
@@ -293,15 +321,16 @@ public class GameController : MonoBehaviour
             for (int j = 0; j < 8; j++)
             {
                 Vector3 pos;
-                 /*if ((i == 4 && j == 3) || (i == 3 && j == 4))
-                  {*/
-                 
+                
+                 if ((i == 4 && j == 3) || (i == 3 && j == 4))
+                  {
+                 /*
                 if ((i == 2 && j == 7) ||
                     (i == 2 && j == 6)||
                     (i == 2 && j == 5)||
                     (i == 1 && j == 5)||
                     (i == 0 && j == 5))
-                {
+                {*/
 
                     squares[j, i] = WHITE;
                     GameObject whiteKoma = Instantiate(koma);
@@ -314,8 +343,10 @@ public class GameController : MonoBehaviour
                     map.Add(key, whiteKoma);
 
                 }
-                 /*else if ((i == 4 && j == 4) || (i == 3 && j == 3))
-                  {*/
+                 
+                 else if ((i == 4 && j == 4) || (i == 3 && j == 3) )//|| (i == 7 && j == 0))//test0804
+                  {
+		  /*
                 else if ((i == 3 && j == 7) ||
                     (i == 3 && j == 6) ||
                     (i == 3 && j == 5) ||
@@ -323,7 +354,7 @@ public class GameController : MonoBehaviour
                     (i == 2 && j == 4) ||
                     (i == 1 && j == 4) ||
                     (i == 0 && j == 4))
-                {
+                {*/
                     squares[j, i] = BLACK;
                     GameObject blackKoma = Instantiate(koma);
                     pos = blackKoma.transform.position;
@@ -362,6 +393,7 @@ public class GameController : MonoBehaviour
         Panel.SetActive(true);
         PlayerTurn.SetActive(false);
         PauseButton.SetActive(false);
+        DaipanButton.SetActive(false);
     }
     //コマオブジェクトを引数に従って配置する。
     public bool putStone(int color, int x, int z, RaycastHit hit)
@@ -450,7 +482,7 @@ public class GameController : MonoBehaviour
         return endNode;
     }
 
-
+  
     //デバッグ用
     public void printBoard()
     {

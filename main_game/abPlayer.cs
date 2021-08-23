@@ -31,7 +31,7 @@ public class abPlayer : MonoBehaviour
     private const int WHITE = 1;
     private const int BLACK = -1;
 
-    private int DEEP =7;
+    private int DEEP =2;
     public void setDeep(int d)
     {
         DEEP = d;
@@ -47,10 +47,7 @@ public class abPlayer : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
-    {
-
-    }
+   
     public class Node
     {
         int x;
@@ -129,6 +126,7 @@ public class abPlayer : MonoBehaviour
         }*/
         if (flag)
         {
+            /*
             if (turn > 46)
             {
                 
@@ -137,7 +135,7 @@ public class abPlayer : MonoBehaviour
                 if (depthNum <= 0)
                     setDeep(1);
                 depthNum = DEEP;
-            }
+            }*/
             n = MiniMax(int.MinValue, int.MaxValue);
         }
         gameController.setCurrentPlayer(saveCP);

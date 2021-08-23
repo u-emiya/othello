@@ -10,12 +10,50 @@ public class TitleController : MonoBehaviour
 
     public GameObject koma;
     public GameObject Panel;
+    public GameObject selectMode;
 
     public Text targetText;
     public Text touchText;
 
     public static int playerNum;
+    public static int CPLevel = 1;
+    public static int playerTurn=1;
+    public static int deep=2;
 
+    public int getDeep()
+    {
+        return deep;
+    }
+    public void setPlayerTurn(int num)
+    {
+        playerTurn = num;
+    }
+
+    public int getPlayerTurn()
+    {
+        return playerTurn;
+    }
+
+    public void setCPLevel(int num)
+    {
+        CPLevel = num;
+        if (CPLevel == 1)
+        {
+            deep = 2;
+        }else if (CPLevel == 2)
+        {
+            deep = 4;
+        }
+        else
+        {
+            deep = 6;
+        }
+    }
+
+    public int getCPLevel()
+    {
+        return CPLevel;
+    }
     public void setPlayerNum(int num)
     {
         playerNum = num;
@@ -30,15 +68,18 @@ public class TitleController : MonoBehaviour
     void Start()
     {
         InitializaArray();
+        CPLevel = 1;
+        playerTurn = 1;
+        deep = 2;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && !Panel.activeSelf && !selectMode.activeSelf)
         {
-         //   targetText = this.GetComponent<Text>();
-targetText.color = new Color(0.2f, 0.2f, 0.2f, 0.35f);
+            //   targetText = this.GetComponent<Text>();
+            targetText.color = new Color(0.2f, 0.2f, 0.2f, 0.35f);
             Panel.SetActive(true);
             touchText.enabled = false;
         }
