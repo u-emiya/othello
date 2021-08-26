@@ -2,13 +2,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class singlePlayerButton : MonoBehaviour
 {
     public TitleController tc;
     public GameObject Panel;
     public GameObject selectPlayerPanel;
-
+    public Button button;
+    public testtest tt;
+    
     public void OnClick()
     {
         tc.setPlayerNum(1);
@@ -16,6 +19,8 @@ public class singlePlayerButton : MonoBehaviour
         {
             Panel.SetActive(true);
             selectPlayerPanel.SetActive(false);
+            button.GetComponent<testtest>().enabled = true;
+            tt.setSwitch();
         }
         else
         {

@@ -33,7 +33,7 @@ public class Rotate : MonoBehaviour
             }
             else
             {
-                transform.Rotate(new Vector3(1.6f, 0, 0));
+                transform.Rotate(new Vector3(2.0f, 0, 0));
             }
 
 

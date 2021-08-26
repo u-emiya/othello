@@ -38,6 +38,7 @@ public class MovePlayer : MonoBehaviour
                 int x = (int)hit.collider.gameObject.transform.position.x;
                 int z = (int)hit.collider.gameObject.transform.position.z;
                 int[] dir = gameController.isPosition(x, z, this.squares);
+                if(0<=x&&x<=7 && 0<=z&&z<=7)
                 if (squares[z, x] == EMPTY && dir[4] == 9 && hit.collider.gameObject.CompareTag("BoardPiece"))
                 {
                     //白のターンのとき

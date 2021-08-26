@@ -64,13 +64,14 @@ public class TitleController : MonoBehaviour
         return playerNum;
     }
 
-
+  
     void Start()
     {
         InitializaArray();
         CPLevel = 1;
         playerTurn = 1;
         deep = 2;
+
     }
 
     // Update is called once per frame

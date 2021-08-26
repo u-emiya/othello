@@ -184,17 +184,19 @@ public class abPlayer : MonoBehaviour
         //評価を返す(はず）
 
         bool endNode = gameController.bothEmpty(this.squares);
-        bool opening = gameController.getTurn() <= 46 && depthNum <= 0;
-        bool ending = gameController.getTurn() > 46 && endNode;
+//        bool opening = gameController.getTurn() <= 46 && depthNum <= 0;
+  //      bool ending = gameController.getTurn() > 46 && endNode;
+        bool opening = depthNum <= 0;
         //47手目以降の評価関数
-        if (opening || ending)
+        //  if (opening || ending)
+        if (opening)
         {
             int eva = 0;
             Node p = new Node(-1, -1);
             gameController.setCurrentPlayer(current * -1);
-            if (ending)
+       /*     if (ending)
                 eva = totalPoint(currentPlayer);
-            else if (opening)
+            else if (opening)*/
                 eva = evaluation(currentPlayer);
             p.setEva(eva);
             return p;

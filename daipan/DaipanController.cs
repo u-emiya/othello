@@ -17,6 +17,9 @@ public class DaipanController : MonoBehaviour
     private IDictionary<int, GameObject> blockMap = new Dictionary<int, GameObject>();
     private IDictionary<int, GameObject> komaMap = new Dictionary<int, GameObject>();
     private IDictionary<int, GameObject> saveKomaMap = new Dictionary<int, GameObject>();
+    private IDictionary<int, GameObject> underKomaMap = new Dictionary<int, GameObject>();
+    private IDictionary<int, int> whiteOrBrack = new Dictionary<int, int>();
+
     private int[,] squares = new int[8, 8];
     private int[,] newSquares = new int[10, 10];
    
@@ -32,6 +35,16 @@ public class DaipanController : MonoBehaviour
         squares = gameController.getSquares();
         komaMap = gameController.getKomaMap();
 
+        foreach(int key in whiteOrBrack.Keys)
+        {
+            int underX = key / 10;
+            int underZ = key % 10;
+            if (squares[underZ, underX] == 0)
+            {
+                squares[underZ, underX] = whiteOrBrack[key];
+                komaMap.Add(key, underKomaMap[key]);
+            }
+        }
 
         GameObject[] blocks = GameObject.FindGameObjectsWithTag("BoardPiece");
         for (int i = 0; i < blocks.Length; i++)
@@ -53,9 +66,18 @@ public class DaipanController : MonoBehaviour
         
         if (Input.GetMouseButtonDown(0))
         {
+            //new board information
             saveKomaMap = new Dictionary<int, GameObject>();
             newSquares = new int[10, 10];
+            squares = gameController.getSquares();
+            komaMap = gameController.getKomaMap();
+
+
             bool isCompletedDaipan = false;
+            outPiecesSlide();
+            int player = gameController.getCurrentPlayer()*(-1);
+            gameController.setCurrentPlayer(player);
+
             Ray ray = cameobj.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out hit) && !hit.collider.gameObject.CompareTag("Table"))
             {
@@ -81,6 +103,8 @@ public class DaipanController : MonoBehaviour
             {
                 Debug.LogFormat("[{0}:{1}]", item.Key, item.Value);
             }*/
+
+           
             if (isCompletedDaipan)
             {
                 GameController.SetActive(true);
@@ -180,7 +204,7 @@ public class DaipanController : MonoBehaviour
         {
            Debug.LogFormat("[{0}:{1}]",item.Key,item.Value);
         }*/
-        var obj = komaMap[shootKomaKey];
+        GameObject obj = shootKoma;
         // Debug.Log("test:"+obj.name);
 
         var rigidbody = obj.GetComponent<Rigidbody>();
@@ -195,12 +219,80 @@ public class DaipanController : MonoBehaviour
 
         rigidbody.AddForce(force, ForceMode.Impulse);
 
+
         
     }
 
 
     // ------      システム内での処理     -----
     //座標(x,z)が台パンの中心地
+    public void movePosition(int x, int z)
+    {
+        int direction;
+        int aend = 5, bend = 5, bstart = 3, astart = 3;
+        int a, b, c, d, e;
+
+        for (a = astart; a >= 0; a--)
+        {
+            for (b = bstart; b < bend; b++)
+            {
+                if (squares[b, a] != 0)
+                {
+                    direction = decidedDirection(a, b, x, z);
+                    sliding(direction, a, b);
+                }
+            }
+            b--;
+            for (c = a + 1; c < aend; c++)
+            {
+                if (squares[b, c] != 0)
+                {
+
+                    direction = decidedDirection(c, b, x, z);
+                    sliding(direction, c, b);
+                }
+            }
+
+            c--;
+            for (d = b - 1; d >= bstart; d--)
+            {
+                if (squares[d, c] != 0)
+                {
+
+                    direction = decidedDirection(c, d, x, z);
+                    sliding(direction, c, d);
+                }
+            }
+
+            d++;
+            for (e = c - 1; e > astart; e--)
+            {
+                if (squares[d, e] != 0)
+                {
+
+                    direction = decidedDirection(e, d, x, z);
+                    sliding(direction, e, d);
+                }
+            }
+
+            e++;
+            aend++;
+            bend++;
+            astart--;
+            bstart--;
+            if (astart < 0)
+                break;
+        }
+
+        for (int i = 0; i < 8; i++)
+        {
+            for (int j = 0; j < 8; j++)
+            {
+                squares[j, i] = newSquares[j + 1, i + 1];
+            }
+        }
+    }
+    /*
     public void movePosition(int x, int z)
     {
         //Debug.Log("before");
@@ -215,7 +307,7 @@ public class DaipanController : MonoBehaviour
             for (b = bstart; b < bend; b++)
             {
                 keyValue = 10 * a + b;
-                if (komaMap.ContainsKey(keyValue))
+                if (squares[b,a]!=0)
                 {
                     direction = decidedDirection(a, b, x, z);
                     sliding(direction, a, b);
@@ -225,7 +317,7 @@ public class DaipanController : MonoBehaviour
             for (c = a + 1; c < aend; c++)
             {
                 keyValue = 10 * c + b;
-                if (komaMap.ContainsKey(keyValue))
+                if (squares[b, c]!=0)
                 {
 
                     direction = decidedDirection(c, b, x, z);
@@ -237,7 +329,7 @@ public class DaipanController : MonoBehaviour
             for (d = b - 1; d >= bstart; d--)
             {
                 keyValue = 10 * c + d;
-                if (komaMap.ContainsKey(keyValue))
+                if (squares[d, c] != 0)
                 {
 
                     direction = decidedDirection(c, d, x, z);
@@ -249,7 +341,7 @@ public class DaipanController : MonoBehaviour
             for (e = c - 1; e > astart; e--)
             {
                 keyValue = 10 * e + d;
-                if (komaMap.ContainsKey(keyValue))
+                if (squares[d, e] != 0)
                 {
 
                     direction = decidedDirection(e, d, x, z);
@@ -269,7 +361,7 @@ public class DaipanController : MonoBehaviour
         {
             for (int j = 0; j < 8; j++)
             {
-                squares[j, i] = newSquares[j + 1, i + 1];
+                squares[j, i] = newSquares[j+1 , i+1 ];
             }
         }
         //Debug.Log("after");
@@ -277,10 +369,11 @@ public class DaipanController : MonoBehaviour
         //komaMap = saveKomaMap;             mark
 
     }
-    private int shootKomaKey = 0;
+    */
+
+    private GameObject shootKoma = null;
     public void sliding(int direction, int x, int z)
     {
-        int shoot, target;
         int i = 0;
         while (i<100)
         {
@@ -289,15 +382,15 @@ public class DaipanController : MonoBehaviour
 
             if (direction == 0)
             {
-                if (val % 3 == 0 && newSquares[z , x ]==0)
+                if (val % 3 == 0 && newSquares[ z  ,x ]==0)
                 {
                     slidePieceProcess(x, z, x - 1, z - 1);
                 }
-                else if (val % 3 == 1 && newSquares[z + 1 , x] == 0)
+                else if (val % 3 == 1 && newSquares[ z + 1 ,x ] == 0)
                 {
                     slidePieceProcess(x, z, x - 1, z );
                 }
-                else if (val % 3 == 2 && newSquares[z, x + 1 ] == 0)
+                else if (val % 3 == 2 && newSquares[ z  , x + 1] == 0)
                 {
                     slidePieceProcess(x, z, x , z - 1);
                 }
@@ -307,15 +400,15 @@ public class DaipanController : MonoBehaviour
             }
             else if (direction == 1)
             {
-                if (val % 3 == 0 && newSquares[z + 1 , x] == 0)
+                if (val % 3 == 0 && newSquares[ z + 1 ,x  ] == 0)
                 {
                     slidePieceProcess(x, z, x - 1, z);
                 }
-                else if (val % 3 == 1 && newSquares[z + 2 , x] == 0)
+                else if (val % 3 == 1 && newSquares[ z + 2 ,x ] == 0)
                 {
                     slidePieceProcess(x, z, x - 1, z + 1);
                 }
-                else if(val % 3 == 2 && newSquares[z , x ] == 0)
+                else if(val % 3 == 2 && newSquares[ z  ,x ] == 0)
                 {
                     slidePieceProcess(x, z, x - 1, z - 1);
                 }
@@ -325,7 +418,7 @@ public class DaipanController : MonoBehaviour
             }
             else if (direction == 2)
             {
-                if (val % 3 == 0 && newSquares[z + 2 , x] == 0)
+                if (val % 3 == 0 && newSquares[z + 2 , x ] == 0)
                 {
                     slidePieceProcess(x, z, x - 1, z + 1);
                 }
@@ -333,7 +426,7 @@ public class DaipanController : MonoBehaviour
                 {
                     slidePieceProcess(x, z, x , z + 1);
                 }
-                else if(val % 3 == 2 && newSquares[z + 1 , x] == 0)
+                else if(val % 3 == 2 && newSquares[ z + 1, x] == 0)
                 {
                     slidePieceProcess(x, z, x - 1, z );
                 }
@@ -343,15 +436,15 @@ public class DaipanController : MonoBehaviour
             }
             else if (direction == 3)
             {
-                if (val % 3 == 0 && newSquares[z, x + 1 ] == 0)
+                if (val % 3 == 0 && newSquares[ z  ,x + 1 ] == 0)
                 {
                     slidePieceProcess(x, z, x, z - 1);
                 }
-                else if (val % 3 == 1 && newSquares[z , x + 2 ] == 0)
+                else if (val % 3 == 1 && newSquares[ z , x + 2 ] == 0)
                 {
                     slidePieceProcess(x, z, x + 1, z - 1);
                 }
-                else if (val % 3 == 2 && newSquares[z , x ] == 0)
+                else if (val % 3 == 2 && newSquares[ z , x ] == 0)
                 {
                     slidePieceProcess(x, z, x - 1, z - 1);
                 }
@@ -369,7 +462,7 @@ public class DaipanController : MonoBehaviour
                 {
                     slidePieceProcess(x, z, x + 1, z + 1);
                 }
-                else if (val % 3 == 2 && newSquares[z + 2, x] == 0)
+                else if (val % 3 == 2 && newSquares[z + 2, x ] == 0)
                 {
                     slidePieceProcess(x, z, x - 1, z + 1);
                 }
@@ -379,15 +472,15 @@ public class DaipanController : MonoBehaviour
             }
             else if (direction == 6)
             {
-                if (val % 3 == 0 && newSquares[z, x + 2 ] == 0)
+                if (val % 3 == 0 && newSquares[ z , x + 2 ] == 0)
                 {
                     slidePieceProcess(x, z, x + 1, z - 1);
                 }
-                else if (val % 3 == 1 && newSquares[z + 1, x + 2] == 0)
+                else if (val % 3 == 1 && newSquares[ z + 1, x + 2] == 0)
                 {
                     slidePieceProcess(x, z, x + 1, z);
                 }
-                else if (val % 3 == 2 && newSquares[z  , x + 1 ] == 0)
+                else if (val % 3 == 2 && newSquares[z  , x  + 1] == 0)
                 {
                     slidePieceProcess(x, z, x, z - 1);
                 }
@@ -397,7 +490,7 @@ public class DaipanController : MonoBehaviour
             }
             else if (direction == 7)
             {
-                if (val % 3 == 0 && newSquares[z + 1, x + 2] == 0)
+                if (val % 3 == 0 && newSquares[ z + 1 , x + 2] == 0)
                 {
                     slidePieceProcess(x, z, x + 1, z); 
                 }
@@ -405,7 +498,7 @@ public class DaipanController : MonoBehaviour
                 {
                     slidePieceProcess(x, z, x + 1, z + 1);
                 }
-                else if (val % 3 == 2 && newSquares[z, x + 2 ] == 0)
+                else if (val % 3 == 2 && newSquares[ z , x + 2 ] == 0)
                 {
                     slidePieceProcess(x, z, x + 1, z - 1);
                 }
@@ -415,7 +508,7 @@ public class DaipanController : MonoBehaviour
             }
             else if (direction == 8)
             {
-                if (val % 3 == 0 && newSquares[z + 2, x + 2] == 0)
+                if (val % 3 == 0 && newSquares[ z + 2, x + 2] == 0)
                 {
                     slidePieceProcess(x, z, x + 1, z + 1);
                 }
@@ -423,7 +516,7 @@ public class DaipanController : MonoBehaviour
                 {
                     slidePieceProcess(x, z, x, z + 1);
                 }
-                else if (val % 3 == 2 && newSquares[z + 1, x + 2] == 0)
+                else if (val % 3 == 2 && newSquares[ z + 1 , x + 2] == 0)
                 {
                     slidePieceProcess(x, z, x + 1, z);
                 }
@@ -440,18 +533,42 @@ public class DaipanController : MonoBehaviour
         }
         if (i == 100)
         {
+
+            int key = x * 10 + z;
+            if (!saveKomaMap.ContainsKey(key))
+            {
+                squares[z, x] *= (-1);
+                slidePieceProcess(x, z, x, z);
+            }
+            else
+            {
+                if (!underKomaMap.ContainsKey(key))
+                {
+                    var obj = komaMap[key];
+                    underKomaMap.Add(key, obj);
+                    whiteOrBrack.Add(key, squares[z, x]);
+                }
+            }
+            squares[z, x] = 0;
+
+            /*
+            var obj = komaMap[(x*10+z)];
+            obj.GetComponent<Collider>().isTrigger = true;
+            squares[z, x] = 0;
+            */
             /*
             for (int j = -1; j < 2; j++)
             {
                 for (int k = -1; k < 2; k++)
                 {
-                    if (newSquares[z + k, x + j] == 0)
+                    if (newSquares[z + k + 1, x + j + 1] == 0)
                     {
-                        slidePieceProcess(x, z, x+j-1, z+k-1);
+                        slidePieceProcess(x, z, x+j, z+k);
                         squares[z, x] = 0;
+                        return;
                     }
                 }
-            }*/
+            }
             if (newSquares[z, x] == 0)
             {
                 slidePieceProcess(x, z, x, z);
@@ -461,15 +578,14 @@ public class DaipanController : MonoBehaviour
 
                 komaMap[x * 10 + z].GetComponent<Collider>().isTrigger = true;
                 komaMap.Remove(x * 10 + z);
-            }
+            }*/
         }
-   
+
     }
 
     public int decidedDirection(int x1, int z1, int x2, int z2)
     {
         int a = x1 - x2, b = z1 - z2;
-        int dumy;
         if (a < 0 && b < 0)
             return 0;
         else if (a < 0 && b == 0)
@@ -499,20 +615,78 @@ public class DaipanController : MonoBehaviour
 
     public void slidePieceProcess(int shoot_x,int shoot_z,int target_x, int target_z)
     {
+        Debug.Log("shoot::::( x , z )---( " + shoot_x + " , " + shoot_z + " )");
+        Debug.Log("target:::( x , z )---( " + target_x + " , " + target_z + " )");
+      
         int shootKey, targetKey;
         newSquares[target_z + 1, target_x + 1] = squares[shoot_z, shoot_x]*(-1);
         shootKey = shoot_x * 10 + shoot_z;
         targetKey = target_x * 10 + target_z;
-        shootKomaKey = shootKey;
+        shootKoma = komaMap[shootKey];
         m_shootPoint = blockMap[shootKey].transform;
-        if(blockMap.ContainsKey(targetKey))
-            m_target = blockMap[targetKey].transform;
+        //if(blockMap.ContainsKey(targetKey))
+        m_target = blockMap[targetKey].transform;
         if (decidedDirection(shoot_x, shoot_z, target_x, target_z) != 4)
             Shoot(m_target.position);
-        slideObject(target_x* 10 + target_z, shoot_x * 10 + shoot_z);
+        slideObject(targetKey, shootKey);
+
+        saveOutOfPieces(target_x, target_z);
+
     }
 
-    
+    private List<GameObject> leftOutPiece = new List<GameObject>();
+    private List<GameObject> rightOutPiece = new List<GameObject>();
+    private List<GameObject> upOutPiece = new List<GameObject>();
+    private List<GameObject> downOutPiece = new List<GameObject>();
+
+    public void saveOutOfPieces(int outx,int outz)
+    {
+        int shootKey = outx * 10 + outz;
+        if (outx == -1)
+        {
+            leftOutPiece.Add(shootKoma);
+        }
+        else if (outx == 8)
+        {
+            rightOutPiece.Add(shootKoma);
+        }
+        else if (outz == -1)
+        {
+            downOutPiece.Add(shootKoma);
+        }
+        else if (outz == 8)
+        {
+            upOutPiece.Add(shootKoma);
+        }
+    }
+    public void outPiecesSlide()
+    {
+        int shootKey = 33;
+        int targetKey = 23;
+        outPieceShoot(leftOutPiece, shootKey, targetKey);
+
+        targetKey = 43;
+        outPieceShoot(rightOutPiece, shootKey, targetKey);
+
+        targetKey = 32;
+        outPieceShoot(downOutPiece, shootKey, targetKey);
+
+        targetKey = 34;
+        outPieceShoot(upOutPiece, shootKey, targetKey);
+
+
+    }
+
+    public void outPieceShoot(List<GameObject> pieceList,int shootPoint, int targetPoint)
+    {
+        foreach (GameObject piece in pieceList)
+        {
+            shootKoma = piece;
+            m_shootPoint = blockMap[shootPoint].transform;
+            m_target = blockMap[targetPoint].transform;
+            Shoot(m_target.position);
+        }
+    }
 }
 
 

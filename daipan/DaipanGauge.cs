@@ -28,6 +28,8 @@ public class DaipanGauge : MonoBehaviour
         {
             image.GetComponent<Image>().fillAmount -= 0.005f;
             image.transform.position = buttonPosition;
+            if (isDaipanAction)
+                maxGauge += 2;
             isDaipanAction = false;
             downLayer.SetActive(true);
         }
