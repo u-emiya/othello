@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 public class DaipanController : MonoBehaviour
@@ -27,6 +28,8 @@ public class DaipanController : MonoBehaviour
     public GameObject GameController;
     public DaipanGauge daipanGauge;
 
+    //test0828
+    public DcToGc dcToGc;
 
     // Start is called before the first frame update
     void Start()
@@ -66,27 +69,29 @@ public class DaipanController : MonoBehaviour
         
         if (Input.GetMouseButtonDown(0))
         {
-            //new board information
-            saveKomaMap = new Dictionary<int, GameObject>();
-            newSquares = new int[10, 10];
-            squares = gameController.getSquares();
-            komaMap = gameController.getKomaMap();
-
-
             bool isCompletedDaipan = false;
-            outPiecesSlide();
-            int player = gameController.getCurrentPlayer()*(-1);
-            gameController.setCurrentPlayer(player);
 
             Ray ray = cameobj.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out hit) && !hit.collider.gameObject.CompareTag("Table"))
             {
+
+                //new board information
+                saveKomaMap = new Dictionary<int, GameObject>();
+                newSquares = new int[10, 10];
+                squares = gameController.getSquares();
+                komaMap = gameController.getKomaMap();
+
+
+                outPiecesSlide();
+                int player = gameController.getCurrentPlayer()*(-1);
+                gameController.setCurrentPlayer(player);
+
                 x = Mathf.RoundToInt(hit.collider.gameObject.transform.position.x);
                 z = Mathf.RoundToInt(hit.collider.gameObject.transform.position.z);
-                //Debug.Log(hit.collider.gameObject.name + ":" + x + "," + z);
                 movePosition(x, z);
                 isCompletedDaipan = true;
-         
+
+                gameController.setKomaMap(saveKomaMap);
             }
             /*
             Debug.Log("this method");
@@ -94,9 +99,7 @@ public class DaipanController : MonoBehaviour
             {
                 Debug.LogFormat("[{0}:{1}]", item.Key, item.Value);
             }*/
-            komaMap = saveKomaMap;
-            gameController.setKomaMap(komaMap);
-            komaMap = gameController.getKomaMap();
+            //komaMap = gameController.getKomaMap();
             /*
             Debug.Log("game controller method");
             foreach (KeyValuePair<int, GameObject> item in komaMap)
@@ -104,10 +107,11 @@ public class DaipanController : MonoBehaviour
                 Debug.LogFormat("[{0}:{1}]", item.Key, item.Value);
             }*/
 
-           
+
             if (isCompletedDaipan)
             {
-                GameController.SetActive(true);
+                //GameController.SetActive(true);
+                dcToGc.startTimeKeeper(3.0f);
                 this.gameObject.SetActive(false);
             }
             //this.enabled = false;
@@ -115,7 +119,6 @@ public class DaipanController : MonoBehaviour
        
      
     }
-
 
     private void Shoot(Vector3 i_targetPosition)
     {
@@ -134,6 +137,12 @@ public class DaipanController : MonoBehaviour
         }
 
         Vector3 vec = ConvertVectorToVector3(speedVec, i_angle, i_targetPosition);
+        Debug.Log(vec);
+        if (float.IsNaN(vec.x))
+        {
+            Debug.Log("HIT HIT HIT HIT HIT HIT HIT HIT HIT HIT HIT HIT HIT HIT HIT ");
+            vec = new Vector3(0f, 7.0f, 0f);
+        }
         InstantiateShootObject(vec);
     }
 
@@ -291,6 +300,8 @@ public class DaipanController : MonoBehaviour
                 squares[j, i] = newSquares[j + 1, i + 1];
             }
         }
+      
+
     }
     /*
     public void movePosition(int x, int z)
@@ -525,7 +536,7 @@ public class DaipanController : MonoBehaviour
             }
             else if (direction == 4)
             {
-                squares[z, x] *= (-1);
+                //squares[z, x] *= (-1);
                 slidePieceProcess(x, z, x , z);
             }
             squares[z, x] = 0;
@@ -537,7 +548,7 @@ public class DaipanController : MonoBehaviour
             int key = x * 10 + z;
             if (!saveKomaMap.ContainsKey(key))
             {
-                squares[z, x] *= (-1);
+                //squares[z, x] *= (-1);
                 slidePieceProcess(x, z, x, z);
             }
             else
@@ -626,7 +637,7 @@ public class DaipanController : MonoBehaviour
         m_shootPoint = blockMap[shootKey].transform;
         //if(blockMap.ContainsKey(targetKey))
         m_target = blockMap[targetKey].transform;
-        if (decidedDirection(shoot_x, shoot_z, target_x, target_z) != 4)
+        //if (decidedDirection(shoot_x, shoot_z, target_x, target_z) != 4)
             Shoot(m_target.position);
         slideObject(targetKey, shootKey);
 
@@ -644,18 +655,22 @@ public class DaipanController : MonoBehaviour
         int shootKey = outx * 10 + outz;
         if (outx == -1)
         {
+            shootKoma.tag = "Table";
             leftOutPiece.Add(shootKoma);
         }
         else if (outx == 8)
         {
+            shootKoma.tag = "Table";
             rightOutPiece.Add(shootKoma);
         }
         else if (outz == -1)
         {
+            shootKoma.tag = "Table";
             downOutPiece.Add(shootKoma);
         }
         else if (outz == 8)
         {
+            shootKoma.tag = "Table";
             upOutPiece.Add(shootKoma);
         }
     }

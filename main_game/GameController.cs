@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 public class GameController : MonoBehaviour
@@ -23,6 +24,7 @@ public class GameController : MonoBehaviour
     public GameObject PlayerTurn;
     public GameObject PauseButton;
     public GameObject DaipanButton;
+    public GameObject DaipanGauge;
 
     public PanelSlider slide;
 
@@ -33,7 +35,7 @@ public class GameController : MonoBehaviour
     public NegascoutPlayer nsPlayer;
 
     public TitleController tc;
-
+    public DcToGc dctoGc;
 
     private int blackCnt = 0;
     private int whiteCnt = 0;
@@ -92,14 +94,15 @@ public class GameController : MonoBehaviour
     {
         playerNum = tc.getPlayerNum();
         cameobj = GameObject.Find("Main Camera").GetComponent<Camera>();
-        
+        dctoGc.startTimeKeeper(3.0f);
         InitializaArray();
         setTurn(0);
     }
-
+  
     // Update is called once per frame
     void Update()
     {
+       
         if (currentPlayer == WHITE)
         {
             if (!isPutStoneAnyposition())
@@ -394,6 +397,7 @@ public class GameController : MonoBehaviour
         PlayerTurn.SetActive(false);
         PauseButton.SetActive(false);
         DaipanButton.SetActive(false);
+        DaipanGauge.SetActive(false);
     }
     //コマオブジェクトを引数に従って配置する。
     public bool putStone(int color, int x, int z, RaycastHit hit)

@@ -24,7 +24,7 @@ public class WinTxt : MonoBehaviour
             text = "White Win!!";
         }
         else
-            text = "ひきにく";
+            text = "draw";
 
         this.targetText = this.GetComponent<Text>(); 
         this.targetText.text = text; 

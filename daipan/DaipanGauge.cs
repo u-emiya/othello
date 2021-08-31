@@ -16,7 +16,7 @@ public class DaipanGauge : MonoBehaviour
     {
         buttonPosition = image.transform.position;
     }
-    public static int maxGauge = 12;
+    public static int maxGauge = 13;
     public static int turn = 1;
     public  float gaugeCount=0;
     private bool isDaipanAction = false;
@@ -29,7 +29,7 @@ public class DaipanGauge : MonoBehaviour
             image.GetComponent<Image>().fillAmount -= 0.005f;
             image.transform.position = buttonPosition;
             if (isDaipanAction)
-                maxGauge += 2;
+                maxGauge += 4;
             isDaipanAction = false;
             downLayer.SetActive(true);
         }
